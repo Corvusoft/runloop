@@ -1,0 +1,3 @@
+[submodule "dependency/catch"]
+	path = dependency/catch
+	url = https://github.com/corvusoft/catch-dependency
