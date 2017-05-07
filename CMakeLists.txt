@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.1.0 FATAL_ERROR )
 
-project( "runloop" VERSION 1.0.0 )
+project( "runloop" VERSION 1.0.0 LANGUAGES CXX )
 message( "Copyright 2013-2017, Corvusoft Ltd, All Rights Reserved." )
 
 #
