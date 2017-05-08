@@ -1,0 +1,14 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+clone_folder: C:\projects\runloop
+init:
+- cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"'
+install:
+- cmd: git submodule update --init --recursive
+build:
+  verbosity: minimal
+test_script:
+- cmd: >-
+    cd c:\projects\runloop\build
+
+    ctest
