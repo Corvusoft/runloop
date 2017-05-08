@@ -16,3 +16,7 @@ include_directories( SYSTEM ${catch_INCLUDE} )
 add_executable( start_integration_test_suite ${SOURCE_DIR}/start.cpp )
 target_link_libraries( start_integration_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( start_integration_test_suite ${EXECUTABLE_OUTPUT_PATH}/start_integration_test_suite )
+
+add_executable( stop_integration_test_suite ${SOURCE_DIR}/stop.cpp )
+target_link_libraries( stop_integration_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( stop_integration_test_suite ${EXECUTABLE_OUTPUT_PATH}/stop_integration_test_suite )

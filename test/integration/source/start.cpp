@@ -37,12 +37,13 @@ TEST_CASE( "Calling start twice", "[runloop::start]" )
     REQUIRE( runloop->start( ) == error_code( ) );
 }
 
-TEST_CASE( "Calling start on a suspended loop", "[runloop::suspend]" )
+TEST_CASE( "Calling start on a suspended loop", "[runloop::start]" )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->launch( [ runloop ]( void )
     {
         REQUIRE( runloop->is_stopped( ) == false );
+        REQUIRE( runloop->is_suspended( ) == false );
         
         runloop->suspend( );
         REQUIRE( runloop->is_suspended( ) == true );

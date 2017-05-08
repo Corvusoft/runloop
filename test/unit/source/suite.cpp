@@ -45,15 +45,6 @@ TEST_CASE( "Call wait with inactive loop", "[runloop::wait]" )
     REQUIRE_NOTHROW( runloop.wait( ) );
 }
 
-TEST_CASE( "Call stop with inactive loop", "[runloop::stop]" )
-{
-    RunLoop runloop;
-    auto error = runloop.stop( );
-    REQUIRE( error == error_code( ) );
-    REQUIRE( runloop.is_stopped( ) == true );
-    REQUIRE( runloop.is_suspended( ) == false );
-}
-
 TEST_CASE( "Call suspend with inactive loop", "[runloop::suspend]" )
 {
     RunLoop runloop;
