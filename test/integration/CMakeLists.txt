@@ -13,3 +13,6 @@ include_directories( SYSTEM ${catch_INCLUDE} )
 #
 # Build
 #
+add_executable( start_integration_test_suite ${SOURCE_DIR}/start.cpp )
+target_link_libraries( start_integration_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( start_integration_test_suite ${EXECUTABLE_OUTPUT_PATH}/start_integration_test_suite )

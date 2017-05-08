@@ -92,8 +92,8 @@ namespace corvusoft
         
         error_code RunLoop::start( void )
         {
-            if ( not is_stopped( ) ) return make_error_code( std::errc::operation_in_progress );
             if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
+            if ( is_stopped( ) == false ) return make_error_code( std::errc::operation_in_progress );
             
             m_pimpl->is_stopped = false;
             m_pimpl->is_suspended = false;
