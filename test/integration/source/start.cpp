@@ -29,8 +29,8 @@ TEST_CASE( "Calling start twice", "[runloop::start]" )
     {
         REQUIRE( runloop->is_stopped( ) == false );
         REQUIRE( runloop->start( ) == make_error_code( std::errc::operation_in_progress ) );
-        runloop->stop( );
         
+        runloop->stop( );
         return error_code( );
     } );
     
@@ -49,8 +49,8 @@ TEST_CASE( "Calling start on a suspended loop", "[runloop::start]" )
         REQUIRE( runloop->is_suspended( ) == true );
         
         REQUIRE( runloop->start( ) == make_error_code( std::errc::operation_would_block ) );
-        runloop->stop( );
         
+        runloop->stop( );
         return error_code( );
     } );
     

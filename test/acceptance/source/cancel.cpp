@@ -6,7 +6,6 @@
 #include <system_error>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 
 //External Includes
@@ -20,7 +19,6 @@ using std::error_code;
 using std::make_shared;
 
 //Project Namespaces
-using corvusoft::core::success;
 using corvusoft::core::RunLoop;
 
 //External Namespaces
@@ -40,20 +38,20 @@ SCENARIO( "Cancel single task", "[runloop::cancel]" )
                 runloop->cancel( "kill me, pleaseeee." );
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "kill me, pleaseeee." );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see the task executed" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -76,26 +74,26 @@ SCENARIO( "Cancel multiple tasks", "[runloop::cancel]" )
                 runloop->cancel( "task 1" );
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "task 1" );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "queue" );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see any tasks executed" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -117,44 +115,44 @@ SCENARIO( "Cancel all tasks", "[runloop::cancel]" )
                 runloop->cancel( );
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "task 1" );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "queue" );
             
             runloop->launch( [ &runloop, &task_called  ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "" );
             
             runloop->launch( [ &runloop, &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "kill me, pleaseeee." );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see any tasks executed" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -176,20 +174,20 @@ SCENARIO( "Cancel single task by key pattern", "[runloop::cancel]" )
                 runloop->cancel( regex( "^Job.*" ) );
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "Job: 1234" );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see the task executed" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -211,26 +209,26 @@ SCENARIO( "Cancel multiple tasks by key pattern", "[runloop::cancel]" )
                 runloop->cancel( regex( "^Job.*" ) );
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             runloop->launch( [ &runloop, &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "Job: 1" );
             
             runloop->launch( [ &runloop, &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             }, "Job: 2" );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see the task executed" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }

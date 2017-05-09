@@ -6,7 +6,6 @@
 #include <system_error>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 
 //External Includes
@@ -21,7 +20,6 @@ using std::make_error_code;
 using std::chrono::milliseconds;
 
 //Project Namespaces
-using corvusoft::core::success;
 using corvusoft::core::RunLoop;
 
 //External Namespaces
@@ -38,20 +36,20 @@ SCENARIO( "Launching tasks when a condition is met", "[runloop::launch_if]" )
             runloop->launch_if( false, [ &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             } );
             runloop->launch( [ &runloop ]( void )
             {
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             error_code status = runloop->start( );
             
             THEN( "I should not see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -62,14 +60,14 @@ SCENARIO( "Launching tasks when a condition is met", "[runloop::launch_if]" )
             {
                 task_called++;
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             
             error_code status = runloop->start( );
             
             THEN( "I should see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 1 );
             }
         }
@@ -87,20 +85,20 @@ SCENARIO( "Launching tasks when an event occurs", "[runloop::launch_if]" )
             int task_called = 0;
             const function< error_code ( void ) > event = [ ]( void )
             {
-                return success;
+                return error_code( );
             };
             
             runloop->launch_if( event, [ &task_called, runloop ]( void )
             {
                 task_called++;
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 1 );
             }
         }
@@ -116,19 +114,19 @@ SCENARIO( "Launching tasks when an event occurs", "[runloop::launch_if]" )
             runloop->launch_if( event, [ &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             } );
             runloop->launch( [ &runloop ]( void )
             {
                 runloop->wait( milliseconds( 500 ) );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should not see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -144,19 +142,19 @@ SCENARIO( "Launching tasks when an event occurs", "[runloop::launch_if]" )
             runloop->launch_if( event, [ &task_called ]( void )
             {
                 task_called++;
-                return success;
+                return error_code( );
             } );
             runloop->launch( [ &runloop ]( void )
             {
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should not see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == 0 );
             }
         }
@@ -176,7 +174,7 @@ SCENARIO( "Returning errors from task events", "[runloop::launch_if]" )
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( status == std::errc::not_a_socket );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I launch a task with an event that returns an error" )
@@ -187,13 +185,13 @@ SCENARIO( "Returning errors from task events", "[runloop::launch_if]" )
             };
             runloop->launch_if( event, [ ]( void )
             {
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see the error handler called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( error_handler_called == true );
             }
         }
@@ -213,7 +211,7 @@ SCENARIO( "Throwing exceptions from task events", "[runloop::launch_if]" )
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( status == std::errc::operation_canceled );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I launch a task with an event that throws an exception" )
@@ -221,17 +219,17 @@ SCENARIO( "Throwing exceptions from task events", "[runloop::launch_if]" )
             const function< error_code ( void ) > event = [ ]( void )
             {
                 throw "arrrr";
-                return success;
+                return error_code( );
             };
             runloop->launch_if( event, [ ]( void )
             {
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see the error handler called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( error_handler_called == true );
             }
         }

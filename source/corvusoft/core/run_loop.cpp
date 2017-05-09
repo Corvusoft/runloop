@@ -13,7 +13,6 @@
 #include <condition_variable>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 #include "corvusoft/core/detail/task_impl.hpp"
 #include "corvusoft/core/detail/run_loop_impl.hpp"
@@ -87,7 +86,7 @@ namespace corvusoft
             m_pimpl->is_suspended = false;
             m_pimpl->pending_work.notify_all( );
             
-            return success;
+            return error_code( );
         }
         
         error_code RunLoop::start( void )
@@ -106,7 +105,7 @@ namespace corvusoft
             m_pimpl->pending_work.notify_one( );
             std::this_thread::yield( );
             
-            error_code status = success;
+            error_code status = error_code( );
             if ( m_pimpl->ready_handler not_eq nullptr ) try
                 {
                     status = m_pimpl->ready_handler( );
@@ -122,10 +121,10 @@ namespace corvusoft
                     m_pimpl->error( status, "non-std::exception raised when calling ready handler." );
                 }
                 
-            if ( status == success ) m_pimpl->dispatch( );
+            if ( status == error_code( ) ) m_pimpl->dispatch( );
             else
             {
-                m_pimpl->error( status, "ready handler execution returned an unsuccessful error condition." );
+                m_pimpl->error( status, "ready handler execution returned an unerror_code( )ful error condition." );
                 stop( );
             }
             
@@ -148,7 +147,7 @@ namespace corvusoft
         
         error_code RunLoop::wait( const milliseconds& duration )
         {
-            if ( is_stopped( ) ) return success;
+            if ( is_stopped( ) ) return error_code( );
             if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
             unique_lock< mutex > guard( m_pimpl->task_lock );
             
@@ -165,7 +164,7 @@ namespace corvusoft
                 
             if ( guard.owns_lock( ) ) guard.unlock( );
             m_pimpl->pending_work.notify_one( );
-            return success;
+            return error_code( );
         }
         
         void RunLoop::cancel( const string& key )
@@ -226,7 +225,7 @@ namespace corvusoft
                 signal_t expected = value;
                 static const int desired = 0;
                 const auto signal_raised = detail::raised_signal.compare_exchange_strong( expected, desired );
-                return ( signal_raised ) ? success : make_error_code( std::errc::operation_not_permitted );
+                return ( signal_raised ) ? error_code( ) : make_error_code( std::errc::operation_not_permitted );
             };
             
             const function< error_code ( void ) > reaction = [ this, value, task, key ]

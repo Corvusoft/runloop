@@ -1,5 +1,4 @@
 //System Includes
-#include <string>
 #include <memory>
 #include <functional>
 #include <system_error>
@@ -11,24 +10,14 @@
 #include <catch.hpp>
 
 //System Namespaces
-using std::string;
 using std::function;
-using std::make_shared;
 using std::error_code;
-using std::make_error_code;
+using std::make_shared;
 
 //Project Namespaces
 using corvusoft::core::RunLoop;
 
 //External Namespaces
-
-TEST_CASE( "Call stop with inactive loop", "[runloop::stop]" )
-{
-    RunLoop runloop;
-    REQUIRE( runloop.stop( ) == error_code( ) );
-    REQUIRE( runloop.is_stopped( ) == true );
-    REQUIRE( runloop.is_suspended( ) == false );
-}
 
 TEST_CASE( "Calling stop twice", "[runloop::stop]" )
 {

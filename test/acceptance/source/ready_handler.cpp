@@ -4,7 +4,6 @@
 #include <system_error>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 
 //External Includes
@@ -17,7 +16,6 @@ using std::make_shared;
 using std::make_error_code;
 
 //Project Namespaces
-using corvusoft::core::success;
 using corvusoft::core::RunLoop;
 
 //External Namespaces
@@ -35,7 +33,7 @@ SCENARIO( "Ready handler", "[runloop::ready_handler]" )
             REQUIRE( runloop->is_stopped( ) == false );
             REQUIRE( runloop->is_suspended( ) == false );
             runloop->stop( );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I start the runloop" )
@@ -44,7 +42,7 @@ SCENARIO( "Ready handler", "[runloop::ready_handler]" )
             
             THEN( "I should see the ready handler called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( ready_handler_called == true );
             }
         }
@@ -68,7 +66,7 @@ SCENARIO( "Returning errors from the ready handler", "[runloop::ready_handler]" 
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( code == std::errc::connection_aborted );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I start the runloop and return an error from the ready handler" )
@@ -101,7 +99,7 @@ SCENARIO( "Throwing exceptions from the ready handler", "[runloop::ready_handler
         runloop->set_ready_handler( [ ]( void )
         {
             throw "error";
-            return success;
+            return error_code( );
         } );
         
         bool error_handler_called = false;
@@ -111,7 +109,7 @@ SCENARIO( "Throwing exceptions from the ready handler", "[runloop::ready_handler
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( code == std::errc::operation_canceled );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I start the runloop and throw an exception from the ready handler" )

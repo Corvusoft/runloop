@@ -7,7 +7,6 @@
 #include <system_error>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 
 //External Includes
@@ -23,7 +22,6 @@ using std::make_error_code;
 using std::chrono::milliseconds;
 
 //Project Namespaces
-using corvusoft::core::success;
 using corvusoft::core::RunLoop;
 
 //External Namespaces
@@ -36,7 +34,7 @@ SCENARIO( "Waiting for all tasks to complete execution", "[runloop::wait]" )
         const auto counter = [ &count ]( void )
         {
             count++;
-            return success;
+            return error_code( );
         };
         
         auto runloop = make_shared< RunLoop >( );
@@ -50,14 +48,14 @@ SCENARIO( "Waiting for all tasks to complete execution", "[runloop::wait]" )
             {
                 runloop->wait( );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see all tasks execute before returning" )
             {
                 REQUIRE( count == 3 );
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
             }
         }
     }
@@ -71,11 +69,11 @@ SCENARIO( "Waiting specified amount of time for tasks to complete execution", "[
         const auto counter = [ &count ]( void )
         {
             count++;
-            return success;
+            return error_code( );
         };
         const function< error_code ( void ) > will_fire = [ ]( void )
         {
-            return success;
+            return error_code( );
         };
         const function< error_code ( void ) > wont_fire = [ ]( void )
         {
@@ -93,14 +91,14 @@ SCENARIO( "Waiting specified amount of time for tasks to complete execution", "[
             {
                 runloop->wait( milliseconds( 250 ) );
                 runloop->stop( );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see all tasks execute before returning" )
             {
                 REQUIRE( count == 1 );
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
             }
         }
     }

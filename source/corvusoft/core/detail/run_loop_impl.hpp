@@ -101,8 +101,8 @@ namespace corvusoft
                                 guard.unlock( );
                                 pending_work.notify_one( );
                                 
-                                if ( task.error.code == success ) launch( task );
-                                if ( task.error.code not_eq success ) error( task );
+                                if ( task.error.code == std::error_code( ) ) launch( task );
+                                if ( task.error.code not_eq std::error_code( ) ) error( task );
                             }
                             else
                             {
@@ -125,11 +125,11 @@ namespace corvusoft
                     
                     task.error.code = task.condition( );
                     
-                    if ( task.error.code == success )                            return true;
+                    if ( task.error.code == std::error_code( ) )                            return true;
                     if ( task.error.code == std::errc::operation_canceled )      return true;
                     if ( task.error.code == std::errc::operation_not_permitted ) return false;
                     
-                    task.error.message = "task precondition returned an unsuccessful error state.";
+                    task.error.message = "task precondition returned an unstd::error_code( )ful error state.";
                     return true;
                 }
                 catch ( const std::exception& ex )
@@ -149,8 +149,8 @@ namespace corvusoft
                 try
                 {
                     task.error.code = task.operation( );
-                    if ( task.error.code not_eq success )
-                        task.error.message = "task execution returned an unsuccessful error condition.";
+                    if ( task.error.code not_eq std::error_code( ) )
+                        task.error.message = "task execution returned an unstd::error_code( )ful error condition.";
                 }
                 catch ( const std::exception& ex )
                 {
@@ -182,7 +182,7 @@ namespace corvusoft
                     {
                         error_handler( key, code, message );
                         //const std::error_code status = error_handler( key, code, message );
-                        //if ( code not_eq success ) log( task, "error handler returned unsuccessful error condition.", code );
+                        //if ( code not_eq std::error_code( ) ) log( task, "error handler returned unstd::error_code( )ful error condition.", code );
                     }
                 }
                 catch ( const std::exception& ex )
@@ -194,7 +194,7 @@ namespace corvusoft
                     //log( task, "non-std::exception raised when calling error handler." );
                 }
                 
-                void log( const std::string& message, const std::error_code& code = success )
+                void log( const std::string& message, const std::error_code& code = std::error_code( ) )
                 {
                     TaskImpl empty_task;
                     //task.error.code, task.error.message, task.error.code.message
@@ -209,7 +209,7 @@ namespace corvusoft
                     if ( log_handler not_eq nullptr )
                     {
                         const auto code = log_handler( task.key, task.error.code, task.error.message );
-                        if ( code not_eq success ) fprintf( stderr, "log handler returned unsuccessful error condition." ); //add task data.
+                        if ( code not_eq std::error_code( ) ) fprintf( stderr, "log handler returned unstd::error_code( )ful error condition." ); //add task data.
                     }
                 }
                 catch ( const std::exception& ex )

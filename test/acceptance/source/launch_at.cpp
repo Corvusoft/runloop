@@ -6,7 +6,6 @@
 #include <system_error>
 
 //Project Includes
-#include "corvusoft/core/error.hpp"
 #include "corvusoft/core/run_loop.hpp"
 
 //External Includes
@@ -23,7 +22,6 @@ using std::chrono::time_point;
 using std::chrono::system_clock;
 
 //Project Namespaces
-using corvusoft::core::success;
 using corvusoft::core::RunLoop;
 
 //External Namespaces
@@ -44,14 +42,14 @@ SCENARIO( "Launching tasks at a specific datestamp", "[runloop::launch_at]" )
                 runloop->stop( );
                 task_called = true;
                 REQUIRE( system_clock::now( ) >= datestamp );
-                return success;
+                return error_code( );
             } );
             
             error_code status = runloop->start( );
             
             THEN( "I should see the task called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( task_called == true );
             }
         }
@@ -73,7 +71,7 @@ SCENARIO( "Returning errors from tasks", "[runloop::launch_at]" )
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( status == std::errc::already_connected );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I launch a task with an event that returns an error" )
@@ -86,7 +84,7 @@ SCENARIO( "Returning errors from tasks", "[runloop::launch_at]" )
             
             THEN( "I should see the error handler called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( error_handler_called == true );
             }
         }
@@ -108,7 +106,7 @@ SCENARIO( "Throwing exceptions from tasks", "[runloop::launch_at]" )
             REQUIRE( key.empty( ) );
             REQUIRE( not message.empty( ) );
             REQUIRE( status == std::errc::operation_canceled );
-            return success;
+            return error_code( );
         } );
         
         WHEN( "I launch a task with an event that throws an exception" )
@@ -116,13 +114,13 @@ SCENARIO( "Throwing exceptions from tasks", "[runloop::launch_at]" )
             runloop->launch_at( datestamp, [ ]( void )
             {
                 throw invalid_argument( "bad" );
-                return success;
+                return error_code( );
             } );
             error_code status = runloop->start( );
             
             THEN( "I should see the error handler called" )
             {
-                REQUIRE( status == success );
+                REQUIRE( status == error_code( ) );
                 REQUIRE( error_handler_called == true );
             }
         }
