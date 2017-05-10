@@ -70,7 +70,7 @@ namespace corvusoft
                 
                 std::function< std::error_code ( void ) > ready_handler = nullptr;
                 
-                std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) > log_handler = nullptr;
+                std::function< std::error_code ( const std::error_code&, const std::string& ) > log_handler = nullptr;
                 
                 std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) > error_handler = nullptr;
                 
@@ -125,11 +125,11 @@ namespace corvusoft
                     
                     task.error.code = task.condition( );
                     
-                    if ( task.error.code == std::error_code( ) )                            return true;
+                    if ( task.error.code == std::error_code( ) )                 return true;
                     if ( task.error.code == std::errc::operation_canceled )      return true;
                     if ( task.error.code == std::errc::operation_not_permitted ) return false;
                     
-                    task.error.message = "task precondition returned an unstd::error_code( )ful error state.";
+                    task.error.message = "task precondition failed with an unsuccessful error state.";
                     return true;
                 }
                 catch ( const std::exception& ex )
@@ -150,7 +150,7 @@ namespace corvusoft
                 {
                     task.error.code = task.operation( );
                     if ( task.error.code not_eq std::error_code( ) )
-                        task.error.message = "task execution returned an unstd::error_code( )ful error condition.";
+                        task.error.message = "task execution failed with an unsuccessful error state.";
                 }
                 catch ( const std::exception& ex )
                 {
@@ -180,45 +180,53 @@ namespace corvusoft
                 {
                     if ( error_handler not_eq nullptr )
                     {
-                        error_handler( key, code, message );
-                        //const std::error_code status = error_handler( key, code, message );
-                        //if ( code not_eq std::error_code( ) ) log( task, "error handler returned unstd::error_code( )ful error condition.", code );
+                        const std::error_code status = error_handler( key, code, message );
+                        if ( status not_eq std::error_code( ) )
+                        {
+                            log( "task '" + key + "' failed with '" + message + "'.", code );
+                            log( "error handler failed with unsuccessful error state.", status );
+                        }
                     }
                 }
                 catch ( const std::exception& ex )
                 {
-                    //log( task, "std::exception raised when calling error handler: " + std::string( ex.what( ) ) );
+                    log( "task '" + key + "' failed with '" + message + "'.", code );
+                    log( "std::exception raised when calling error handler: " + std::string( ex.what( ) ) );
                 }
                 catch ( ... )
                 {
-                    //log( task, "non-std::exception raised when calling error handler." );
+                    log( "task '" + key + "' failed with '" + message + "'.", code );
+                    log( "non-std::exception raised when calling error handler." );
                 }
                 
                 void log( const std::string& message, const std::error_code& code = std::error_code( ) )
-                {
-                    TaskImpl empty_task;
-                    //task.error.code, task.error.message, task.error.code.message
-                    //log( "task " + task.key + " failed with error code " + std::string( task.error.code ) + " " + task.error.message );
-                    log( empty_task, message, code );
-                }
-                
-                void log( const TaskImpl& task, const std::string&, const std::error_code& )
                 try
                 {
-                    //what about the other code.
                     if ( log_handler not_eq nullptr )
                     {
-                        const auto code = log_handler( task.key, task.error.code, task.error.message );
-                        if ( code not_eq std::error_code( ) ) fprintf( stderr, "log handler returned unstd::error_code( )ful error condition." ); //add task data.
+                        const auto status = log_handler( code, message );
+                        if ( status not_eq std::error_code( ) )
+                        {
+                            fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
+                            fprintf( stderr, "[%i %s] log handler failed with unsuccessful error state.", status.value( ), status.message( ).data( ) );
+                        }
                     }
                 }
                 catch ( const std::exception& ex )
                 {
-                    fprintf( stderr, "std::exception raised when attempting to log failure: %s", ex.what( ) ); //add task data.
+                    fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
+                    fprintf( stderr, "std::exception raised when attempting to log failure: %s", ex.what( ) );
                 }
                 catch ( ... )
                 {
-                    fprintf( stderr, "non-std::exception raised when attempting to log failure." ); //add task data.
+                    fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
+                    fprintf( stderr, "non-std::exception raised when attempting to log failure." );
+                }
+                
+                void log( const TaskImpl& task, const std::string& message, const std::error_code& code )
+                {
+                    log( message, code );
+                    log( task.error.message, task.error.code );
                 }
             };
         }

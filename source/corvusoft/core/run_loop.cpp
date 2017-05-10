@@ -274,7 +274,7 @@ namespace corvusoft
             m_pimpl->ready_handler = value;
         }
         
-        void RunLoop::set_log_handler( const function< error_code ( const string&, const error_code&, const string& ) >& value )
+        void RunLoop::set_log_handler( const function< error_code ( const error_code&, const string& ) >& value )
         {
             suspend( );
             m_pimpl->log_handler = value;

@@ -85,7 +85,7 @@ namespace corvusoft
                 
                 void set_ready_handler( const std::function< std::error_code ( void ) >& value );
                 
-                void set_log_handler( const std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) >& value );
+                void set_log_handler( const std::function< std::error_code ( const std::error_code&, const std::string& ) >& value );
                 
                 void set_error_handler( const std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) >& value );
                 

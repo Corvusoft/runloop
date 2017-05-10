@@ -23,7 +23,7 @@ TEST_CASE( "Alter log handler", "[runloop::error-handler]" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.set_log_handler( nullptr ) );
-    REQUIRE_NOTHROW( runloop.set_log_handler( [ ]( const string&, const error_code&, const string& )
+    REQUIRE_NOTHROW( runloop.set_log_handler( [ ]( const error_code&, const string& )
     {
         return error_code( );
     } ) );
