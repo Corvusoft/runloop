@@ -31,7 +31,7 @@ namespace corvusoft
                 std::string message = "";
                 
                 std::error_code code { };
-            } error;
+            } error { };
             
             std::string key = "";
             
