@@ -61,12 +61,12 @@ make test
 
 You will now find all required components installed in the distribution folder.
 
-Please submit all enhancements, proposals, and defects via the [issue](http://github.com/corvusoft/restbed/issues) tracker.
+Please submit all enhancements, proposals, and defects via the [issue](http://github.com/corvusoft/runloop/issues) tracker.
 
 Documentation
 -------------
 
-This codebase is intended to be as self documenting as possible. We have supplied many [test cases](https://github.com/corvusoft/restbed/tree/master/test) to help aid developers.
+This codebase is intended to be as self documenting as possible. We have supplied many [test cases](https://github.com/corvusoft/runloop/tree/master/test) to help aid developers.
 
 You can locate the latest API documentation [here](https://github.com/Corvusoft/runloop/tree/master/documentation).
 
