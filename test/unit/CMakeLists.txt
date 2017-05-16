@@ -29,10 +29,6 @@ add_executable( launch_if_unit_test_suite ${SOURCE_DIR}/launch_if.cpp )
 target_link_libraries( launch_if_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( launch_if_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_if_unit_test_suite )
 
-add_executable( launch_on_unit_test_suite ${SOURCE_DIR}/launch_on.cpp )
-target_link_libraries( launch_on_unit_test_suite ${STATIC_LIBRARY_NAME} )
-add_test( launch_on_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_on_unit_test_suite )
-
 add_executable( launch_unit_test_suite ${SOURCE_DIR}/launch.cpp )
 target_link_libraries( launch_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( launch_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_unit_test_suite )
