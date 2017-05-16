@@ -22,7 +22,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Launching tasks on a single thread", "[runloop::launch]" )
+SCENARIO( "Launching tasks on a single thread" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -58,7 +58,7 @@ SCENARIO( "Launching tasks on a single thread", "[runloop::launch]" )
     }
 }
 
-SCENARIO( "Launching tasks on multiple threads", "[runloop::launch]" )
+SCENARIO( "Launching tasks on multiple threads" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -93,7 +93,7 @@ SCENARIO( "Launching tasks on multiple threads", "[runloop::launch]" )
     }
 }
 
-SCENARIO( "Launching tasks within other tasks", "[runloop::launch]" )
+SCENARIO( "Launching tasks within other tasks" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -131,7 +131,7 @@ SCENARIO( "Launching tasks within other tasks", "[runloop::launch]" )
     }
 }
 
-SCENARIO( "Returning errors from launched tasks", "[runloop::launch]" )
+SCENARIO( "Returning errors from launched tasks" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {
@@ -164,7 +164,7 @@ SCENARIO( "Returning errors from launched tasks", "[runloop::launch]" )
     }
 }
 
-SCENARIO( "Throwing exceptions from launched tasks", "[runloop::launch]" )
+SCENARIO( "Throwing exceptions from launched tasks" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {

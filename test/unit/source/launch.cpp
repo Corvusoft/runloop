@@ -20,7 +20,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Launch a task with inactive loop", "[runloop::launch]" )
+TEST_CASE( "Launch a task with inactive loop" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch( nullptr ) );

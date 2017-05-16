@@ -26,7 +26,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Waiting for all tasks to complete execution", "[runloop::wait]" )
+SCENARIO( "Waiting for all tasks to complete execution" )
 {
     GIVEN( "I have setup a new runloop with serveral pending tasks" )
     {
@@ -61,7 +61,7 @@ SCENARIO( "Waiting for all tasks to complete execution", "[runloop::wait]" )
     }
 }
 
-SCENARIO( "Waiting specified amount of time for tasks to complete execution", "[runloop::wait]" )
+SCENARIO( "Waiting specified amount of time for tasks to complete execution" )
 {
     GIVEN( "I have setup a new runloop with serveral pending tasks" )
     {

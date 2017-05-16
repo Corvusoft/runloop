@@ -26,7 +26,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Launching tasks at a specific datestamp", "[runloop::launch_at]" )
+SCENARIO( "Launching tasks at a specific datestamp" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -56,7 +56,7 @@ SCENARIO( "Launching tasks at a specific datestamp", "[runloop::launch_at]" )
     }
 }
 
-SCENARIO( "Returning errors from tasks", "[runloop::launch_at]" )
+SCENARIO( "Returning errors from tasks" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {
@@ -91,7 +91,7 @@ SCENARIO( "Returning errors from tasks", "[runloop::launch_at]" )
     }
 }
 
-SCENARIO( "Throwing exceptions from tasks", "[runloop::launch_at]" )
+SCENARIO( "Throwing exceptions from tasks" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {

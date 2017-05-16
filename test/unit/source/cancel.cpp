@@ -21,19 +21,19 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Call cancel with inactive loop", "[runloop::cancel]" )
+TEST_CASE( "Call cancel with inactive loop" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.cancel( ) );
 }
 
-TEST_CASE( "Call cancel with unknown task key on inactive loop", "[runloop::cancel]" )
+TEST_CASE( "Call cancel with unknown task key on inactive loop" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.cancel( "123456" ) );
 }
 
-TEST_CASE( "Call cancel with known task key on inactive loop", "[runloop::cancel]" )
+TEST_CASE( "Call cancel with known task key on inactive loop" )
 {
     RunLoop runloop;
     runloop.launch( [ ]( void )
@@ -44,13 +44,13 @@ TEST_CASE( "Call cancel with known task key on inactive loop", "[runloop::cancel
     REQUIRE_NOTHROW( runloop.cancel( "test-key-value" ) );
 }
 
-TEST_CASE( "Call cancel with unknown task key pattern on inactive loop", "[runloop::cancel]" )
+TEST_CASE( "Call cancel with unknown task key pattern on inactive loop" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.cancel( regex( "123456" ) ) );
 }
 
-TEST_CASE( "Call cancel with known task key pattern on inactive loop", "[runloop::cancel]" )
+TEST_CASE( "Call cancel with known task key pattern on inactive loop" )
 {
     RunLoop runloop;
     runloop.launch( [ ]( void )

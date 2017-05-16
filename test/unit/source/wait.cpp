@@ -15,7 +15,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Call wait with inactive loop", "[runloop::wait]" )
+TEST_CASE( "Call wait with inactive loop" )
 {
     RunLoop runloop;
     REQUIRE( runloop.wait( ) == error_code( ) );

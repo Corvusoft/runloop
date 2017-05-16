@@ -19,7 +19,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Calling stop twice", "[runloop::stop]" )
+TEST_CASE( "Calling stop twice" )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->launch( [ runloop ]( void )
@@ -41,7 +41,7 @@ TEST_CASE( "Calling stop twice", "[runloop::stop]" )
     REQUIRE( runloop->start( ) == error_code( ) );
 }
 
-TEST_CASE( "Calling stop on a suspended loop", "[runloop::stop]" )
+TEST_CASE( "Calling stop on a suspended loop" )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->launch( [ runloop ]( void )

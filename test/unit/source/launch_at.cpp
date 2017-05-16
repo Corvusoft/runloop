@@ -21,7 +21,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Launch task at timestamp with inactive loop", "[runloop::launch-at]" )
+TEST_CASE( "Launch task at timestamp with inactive loop" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch_at( system_clock::now( ), nullptr ) );

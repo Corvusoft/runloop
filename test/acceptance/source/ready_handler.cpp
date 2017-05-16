@@ -20,7 +20,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Ready handler", "[runloop::ready_handler]" )
+SCENARIO( "Ready handler" )
 {
     GIVEN( "I have setup a new runloop with a ready handler" )
     {
@@ -49,7 +49,7 @@ SCENARIO( "Ready handler", "[runloop::ready_handler]" )
     }
 }
 
-SCENARIO( "Returning errors from the ready handler", "[runloop::ready_handler]" )
+SCENARIO( "Returning errors from the ready handler" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {
@@ -91,7 +91,7 @@ SCENARIO( "Returning errors from the ready handler", "[runloop::ready_handler]" 
     }
 }
 
-SCENARIO( "Throwing exceptions from the ready handler", "[runloop::ready_handler]" )
+SCENARIO( "Throwing exceptions from the ready handler" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {

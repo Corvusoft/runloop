@@ -24,7 +24,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Launching tasks when a condition is met", "[runloop::launch_if]" )
+SCENARIO( "Launching tasks when a condition is met" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -74,7 +74,7 @@ SCENARIO( "Launching tasks when a condition is met", "[runloop::launch_if]" )
     }
 }
 
-SCENARIO( "Launching tasks when an event occurs", "[runloop::launch_if]" )
+SCENARIO( "Launching tasks when an event occurs" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -161,7 +161,7 @@ SCENARIO( "Launching tasks when an event occurs", "[runloop::launch_if]" )
     }
 }
 
-SCENARIO( "Returning errors from task events", "[runloop::launch_if]" )
+SCENARIO( "Returning errors from task events" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {
@@ -198,7 +198,7 @@ SCENARIO( "Returning errors from task events", "[runloop::launch_if]" )
     }
 }
 
-SCENARIO( "Throwing exceptions from task events", "[runloop::launch_if]" )
+SCENARIO( "Throwing exceptions from task events" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {

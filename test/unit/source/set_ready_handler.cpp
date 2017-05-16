@@ -17,7 +17,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Alter ready handler", "[runloop::ready-handler]" )
+TEST_CASE( "Alter ready handler" )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.set_ready_handler( nullptr ) );

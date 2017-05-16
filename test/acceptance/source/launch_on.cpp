@@ -22,7 +22,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Launching tasks on operating system signals", "[runloop::launch_on]" )
+SCENARIO( "Launching tasks on operating system signals" )
 {
     GIVEN( "I have setup a new runloop with a SIGALRM handler" )
     {
@@ -61,7 +61,7 @@ SCENARIO( "Launching tasks on operating system signals", "[runloop::launch_on]" 
     }
 }
 
-SCENARIO( "Returning errors from signal handlers", "[runloop::launch_on]" )
+SCENARIO( "Returning errors from signal handlers" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {
@@ -100,7 +100,7 @@ SCENARIO( "Returning errors from signal handlers", "[runloop::launch_on]" )
     }
 }
 
-SCENARIO( "Throwing exceptions from signal handlers", "[runloop::launch_on]" )
+SCENARIO( "Throwing exceptions from signal handlers" )
 {
     GIVEN( "I have setup a new runloop with a error handler" )
     {

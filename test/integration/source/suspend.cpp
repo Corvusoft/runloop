@@ -19,7 +19,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Calling suspend twice", "[runloop::suspend]" )
+TEST_CASE( "Calling suspend twice" )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->launch( [ runloop ]( void )

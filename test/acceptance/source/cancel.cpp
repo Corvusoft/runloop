@@ -23,7 +23,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Cancel single task", "[runloop::cancel]" )
+SCENARIO( "Cancel single task" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -58,7 +58,7 @@ SCENARIO( "Cancel single task", "[runloop::cancel]" )
     }
 }
 
-SCENARIO( "Cancel multiple tasks", "[runloop::cancel]" )
+SCENARIO( "Cancel multiple tasks" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -100,7 +100,7 @@ SCENARIO( "Cancel multiple tasks", "[runloop::cancel]" )
     }
 }
 
-SCENARIO( "Cancel all tasks", "[runloop::cancel]" )
+SCENARIO( "Cancel all tasks" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -159,7 +159,7 @@ SCENARIO( "Cancel all tasks", "[runloop::cancel]" )
     }
 }
 
-SCENARIO( "Cancel single task by key pattern", "[runloop::cancel]" )
+SCENARIO( "Cancel single task by key pattern" )
 {
     GIVEN( "I have setup a new runloop" )
     {
@@ -194,7 +194,7 @@ SCENARIO( "Cancel single task by key pattern", "[runloop::cancel]" )
     }
 }
 
-SCENARIO( "Cancel multiple tasks by key pattern", "[runloop::cancel]" )
+SCENARIO( "Cancel multiple tasks by key pattern" )
 {
     GIVEN( "I have setup a new runloop" )
     {

@@ -15,7 +15,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Call stop with inactive loop", "[runloop::stop]" )
+TEST_CASE( "Call stop with inactive loop" )
 {
     RunLoop runloop;
     REQUIRE( runloop.stop( ) == error_code( ) );

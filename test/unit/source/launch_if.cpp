@@ -19,7 +19,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Launch task on event with inactive loop", "[runloop::launch-if]" )
+TEST_CASE( "Launch task on event with inactive loop" )
 {
     const function< error_code ( void ) > empty = nullptr;
     const function< error_code ( void ) > task = [ ]( void )
