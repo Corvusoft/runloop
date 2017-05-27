@@ -15,6 +15,7 @@
 #include <vector>
 #include <thread>
 #include <memory>
+#include <ciso646>
 #include <csignal>
 #include <stdexcept>
 #include <functional>

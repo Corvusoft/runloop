@@ -2,6 +2,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <ciso646>
 #include <system_error>
 
 //Project Includes

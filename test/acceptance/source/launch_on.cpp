@@ -1,6 +1,7 @@
 //System Includes
 #include <memory>
 #include <string>
+#include <ciso646>
 #include <csignal>
 #include <system_error>
 
@@ -29,14 +30,14 @@ SCENARIO( "Launching tasks on operating system signals" )
         int sigalrm_handler_called = 0;
         
         auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGALRM, [ &sigalrm_handler_called, runloop ]( void )
+        runloop->launch_on( SIGINT, [ &sigalrm_handler_called, runloop ]( void )
         {
             if ( sigalrm_handler_called == 2 ) runloop->stop( );
             else sigalrm_handler_called++;
             
             runloop->launch( [ ]( void )
             {
-                raise( SIGALRM );
+                raise( SIGINT );
                 return error_code( );
             } );
             return error_code( );
@@ -46,7 +47,7 @@ SCENARIO( "Launching tasks on operating system signals" )
         {
             runloop->launch( [ ]( void )
             {
-                raise( SIGALRM );
+                raise( SIGINT );
                 return error_code( );
             } );
             
@@ -68,7 +69,7 @@ SCENARIO( "Returning errors from signal handlers" )
         bool error_handler_called = false;
         
         auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGALRM, [ ]( void )
+        runloop->launch_on( SIGINT, [ ]( void )
         {
             return make_error_code( std::errc::not_a_socket );
         }, "SIGALRM HANDLER" );
@@ -86,7 +87,7 @@ SCENARIO( "Returning errors from signal handlers" )
         {
             runloop->set_ready_handler( [ ]( void )
             {
-                raise( SIGALRM );
+                raise( SIGINT );
                 return error_code( );
             } );
             error_code status = runloop->start( );
@@ -107,7 +108,7 @@ SCENARIO( "Throwing exceptions from signal handlers" )
         bool error_handler_called = false;
         
         auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGALRM, [ ]( void )
+        runloop->launch_on( SIGINT, [ ]( void )
         {
             throw "error";
             return error_code( );
@@ -126,7 +127,7 @@ SCENARIO( "Throwing exceptions from signal handlers" )
         {
             runloop->set_ready_handler( [ ]( void )
             {
-                raise( SIGALRM );
+                raise( SIGINT );
                 return error_code( );
             } );
             error_code status = runloop->start( );

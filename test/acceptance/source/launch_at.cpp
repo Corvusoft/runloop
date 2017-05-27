@@ -2,6 +2,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <ciso646>
 #include <stdexcept>
 #include <system_error>
 
