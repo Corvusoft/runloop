@@ -50,6 +50,7 @@ Please contact sales@corvusoft.co.uk, for support and licensing options includin
 Build
 -----
 
+*Unix*
 ```bash
 git clone --recursive https://github.com/corvusoft/runloop.git
 mkdir runloop/build
@@ -57,6 +58,16 @@ cd runloop/build
 cmake ..
 make [-j CPU_CORES+1] install
 make test
+```
+
+*Windows*
+```bash
+git clone --recursive https://github.com/corvusoft/runloop.git
+mkdir runloop/build
+cd runloop/build
+cmake -G "Visual Studio 15 2017" ..
+cmake --build . --target ALL_BUILD --config Release
+ctest
 ```
 
 You will now find all required components installed in the distribution folder.
