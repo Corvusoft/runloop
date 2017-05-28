@@ -1,14 +1,23 @@
 version: 1.0.{build}
-image: Visual Studio 2015
+image: Visual Studio 2017
+configuration: Release
+platform: x64
 clone_folder: C:\projects\runloop
-init:
-- cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"'
-install:
-- cmd: git submodule update --init --recursive
+clone_script:
+- cmd: git clone --recursive http://github.com/corvusoft/runloop.git
+before_build:
+- cmd: >-
+    mkdir c:\projects\runloop\build
+
+    cd c:\projects\runloop\build
+
+    cmake -G "Visual Studio 15 2017" ..
 build:
-  verbosity: minimal
+  project: c:\projects\runloop\build\runloop.sln
+  verbosity: detailed
 test_script:
 - cmd: >-
     cd c:\projects\runloop\build
 
     ctest
+deploy: off
