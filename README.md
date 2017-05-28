@@ -1,5 +1,5 @@
 Runloop [![Unix Build Status](https://travis-ci.org/Corvusoft/runloop.svg?branch=master)](https://travis-ci.org/Corvusoft/runloop)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/99j5k44bcl2o3e23/branch/master?svg=true)](https://ci.appveyor.com/project/corvusoft/runloop/branch/master)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/qy9fktman5l3btyk?svg=true)](https://ci.appveyor.com/project/Corvusoft/runloop)
 =============================================================================================================================
 
 Example
