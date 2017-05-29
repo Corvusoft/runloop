@@ -17,6 +17,10 @@ add_executable( cancel_acceptance_test_suite ${SOURCE_DIR}/cancel.cpp )
 target_link_libraries( cancel_acceptance_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( cancel_acceptance_test_suite ${EXECUTABLE_OUTPUT_PATH}/cancel_acceptance_test_suite )
 
+add_executable( launch_in_acceptance_test_suite ${SOURCE_DIR}/launch_in.cpp )
+target_link_libraries( launch_in_acceptance_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( launch_in_acceptance_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_in_acceptance_test_suite )
+
 add_executable( launch_at_acceptance_test_suite ${SOURCE_DIR}/launch_at.cpp )
 target_link_libraries( launch_at_acceptance_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( launch_at_acceptance_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_at_acceptance_test_suite )

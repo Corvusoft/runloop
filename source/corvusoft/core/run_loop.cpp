@@ -258,6 +258,12 @@ namespace corvusoft
             m_pimpl->pending_work.notify_one( );
         }
         
+        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( void ) >& task, const string& key )
+        {
+            const auto timestamp = system_clock::now( ) + delay;
+            launch_at( timestamp, task, key );
+        }
+        
         void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( void ) >& task, const string& key )
         {
             const function< error_code ( void ) > event = [ timestamp ] { return ( timestamp <= system_clock::now( ) ) ? error_code( ) : make_error_code( std::errc::operation_not_permitted ); };

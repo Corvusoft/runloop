@@ -76,6 +76,8 @@ namespace corvusoft
                 
                 void launch_if( const std::function< std::error_code ( void ) >& event, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
+                void launch_in( const std::chrono::milliseconds& delay, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                
                 void launch_at( const std::chrono::time_point< std::chrono::system_clock >& timestamp, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
                 //Getters

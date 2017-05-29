@@ -21,6 +21,10 @@ add_executable( constructor_unit_test_suite ${SOURCE_DIR}/constructor.cpp )
 target_link_libraries( constructor_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( constructor_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/constructor_unit_test_suite )
 
+add_executable( launch_in_unit_test_suite ${SOURCE_DIR}/launch_in.cpp )
+target_link_libraries( launch_in_unit_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( launch_in_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_in_unit_test_suite )
+
 add_executable( launch_at_unit_test_suite ${SOURCE_DIR}/launch_at.cpp )
 target_link_libraries( launch_at_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( launch_at_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/launch_at_unit_test_suite )
