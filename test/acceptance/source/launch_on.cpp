@@ -23,120 +23,93 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-SCENARIO( "Launching tasks on operating system signals" )
+TEST_CASE( "Launching tasks on operating system signals" )
 {
-    GIVEN( "I have setup a new runloop with a SIGALRM handler" )
+    int sigalrm_handler_called = 0;
+    
+    auto runloop = make_shared< RunLoop >( );
+    runloop->launch_on( SIGINT, [ &sigalrm_handler_called, runloop ]( void )
     {
-        int sigalrm_handler_called = 0;
+        if ( sigalrm_handler_called == 2 ) runloop->stop( );
+        else sigalrm_handler_called++;
         
-        auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGINT, [ &sigalrm_handler_called, runloop ]( void )
+        runloop->launch( [ ]( void )
         {
-            if ( sigalrm_handler_called == 2 ) runloop->stop( );
-            else sigalrm_handler_called++;
-            
-            runloop->launch( [ ]( void )
-            {
-                raise( SIGINT );
-                return error_code( );
-            } );
+            raise( SIGINT );
             return error_code( );
         } );
-        
-        WHEN( "I raise a SIGALRM signal" )
-        {
-            runloop->launch( [ ]( void )
-            {
-                raise( SIGINT );
-                return error_code( );
-            } );
-            
-            error_code status = runloop->start( );
-            
-            THEN( "I should see the SIGALRM signal handler called" )
-            {
-                REQUIRE( status == error_code( ) );
-                REQUIRE( sigalrm_handler_called == 2 );
-            }
-        }
-    }
+        return error_code( );
+    } );
+    
+    runloop->launch( [ ]( void )
+    {
+        raise( SIGINT );
+        return error_code( );
+    } );
+    
+    error_code status = runloop->start( );
+    
+    REQUIRE( status == error_code( ) );
+    REQUIRE( sigalrm_handler_called == 2 );
 }
 
-SCENARIO( "Returning errors from signal handlers" )
+TEST_CASE( "Returning errors from signal handlers" )
 {
-    GIVEN( "I have setup a new runloop with a error handler" )
+    bool error_handler_called = false;
+    
+    auto runloop = make_shared< RunLoop >( );
+    runloop->launch_on( SIGINT, [ ]( void )
     {
-        bool error_handler_called = false;
-        
-        auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGINT, [ ]( void )
-        {
-            return make_error_code( std::errc::not_a_socket );
-        }, "SIGALRM HANDLER" );
-        runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
-        {
-            runloop->stop( );
-            error_handler_called = true;
-            REQUIRE( key == "SIGALRM HANDLER" );
-            REQUIRE( code == std::errc::not_a_socket );
-            REQUIRE( not message.empty( ) );
-            return error_code( );
-        } );
-        
-        WHEN( "I launch a task on SIGALRM returning an error status" )
-        {
-            runloop->set_ready_handler( [ ]( void )
-            {
-                raise( SIGINT );
-                return error_code( );
-            } );
-            error_code status = runloop->start( );
-            
-            THEN( "I should see the error handler called" )
-            {
-                REQUIRE( status == error_code( ) );
-                REQUIRE( error_handler_called == true );
-            }
-        }
-    }
+        return make_error_code( std::errc::not_a_socket );
+    }, "SIGALRM HANDLER" );
+    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
+    {
+        runloop->stop( );
+        error_handler_called = true;
+        REQUIRE( key == "SIGALRM HANDLER" );
+        REQUIRE( code == std::errc::not_a_socket );
+        REQUIRE( not message.empty( ) );
+        return error_code( );
+    } );
+    
+    runloop->set_ready_handler( [ ]( void )
+    {
+        raise( SIGINT );
+        return error_code( );
+    } );
+    error_code status = runloop->start( );
+    
+    REQUIRE( status == error_code( ) );
+    REQUIRE( error_handler_called == true );
 }
 
-SCENARIO( "Throwing exceptions from signal handlers" )
+TEST_CASE( "Throwing exceptions from signal handlers" )
 {
-    GIVEN( "I have setup a new runloop with a error handler" )
+    bool error_handler_called = false;
+    
+    auto runloop = make_shared< RunLoop >( );
+    runloop->launch_on( SIGINT, [ ]( void )
     {
-        bool error_handler_called = false;
-        
-        auto runloop = make_shared< RunLoop >( );
-        runloop->launch_on( SIGINT, [ ]( void )
-        {
-            throw "error";
-            return error_code( );
-        }, "SIGALRM HANDLER" );
-        runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
-        {
-            runloop->stop( );
-            error_handler_called = true;
-            REQUIRE( key == "SIGALRM HANDLER" );
-            REQUIRE( code == std::errc::operation_canceled );
-            REQUIRE( not message.empty( ) );
-            return error_code( );
-        } );
-        
-        WHEN( "I launch a task on SIGALRM throwing an exception" )
-        {
-            runloop->set_ready_handler( [ ]( void )
-            {
-                raise( SIGINT );
-                return error_code( );
-            } );
-            error_code status = runloop->start( );
-            
-            THEN( "I should see the error handler called" )
-            {
-                REQUIRE( status == error_code( ) );
-                REQUIRE( error_handler_called == true );
-            }
-        }
-    }
+        throw "error";
+        return error_code( );
+    }, "SIGALRM HANDLER" );
+    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
+    {
+        runloop->stop( );
+        error_handler_called = true;
+        REQUIRE( key == "SIGALRM HANDLER" );
+        REQUIRE( code == std::errc::operation_canceled );
+        REQUIRE( not message.empty( ) );
+        return error_code( );
+    } );
+    
+    runloop->set_ready_handler( [ ]( void )
+    {
+        raise( SIGINT );
+        return error_code( );
+    } );
+    error_code status = runloop->start( );
+    
+    REQUIRE( status == error_code( ) );
+    REQUIRE( error_handler_called == true );
 }
