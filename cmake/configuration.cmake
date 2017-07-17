@@ -1,5 +1,5 @@
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
-    set( CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/distribution" CACHE PATH "Install path prefix" FORCE )
+    set( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/distribution" CACHE PATH "Install path prefix" FORCE )
 endif ( )
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC )

@@ -16,7 +16,7 @@ using corvusoft::core::RunLoop;
 int main( const int, const char** )
 {
     int count = 0;
-    const auto counter = [ &count ]( void ) { count++; return success; };
+    const auto counter = [ &count ]( void ) { count++; return error_code( ); };
             
     auto runloop = make_shared< RunLoop >( );
     runloop->launch( counter );
@@ -26,7 +26,7 @@ int main( const int, const char** )
     {
         runloop->wait( );
         runloop->stop( );
-        return success;
+        return error_code( );
     } );
 
     runloop->start( );
