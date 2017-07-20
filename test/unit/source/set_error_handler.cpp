@@ -25,6 +25,7 @@ TEST_CASE( "Alter error handler" )
     REQUIRE_NOTHROW( runloop.set_error_handler( nullptr ) );
     REQUIRE_NOTHROW( runloop.set_error_handler( [ ]( const string&, const error_code&, const string& )
     {
+        FAIL( "Runloop should not invoke error handler when calling setter." );
         return error_code( );
     } ) );
 }

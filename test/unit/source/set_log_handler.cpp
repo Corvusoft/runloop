@@ -25,6 +25,7 @@ TEST_CASE( "Alter log handler" )
     REQUIRE_NOTHROW( runloop.set_log_handler( nullptr ) );
     REQUIRE_NOTHROW( runloop.set_log_handler( [ ]( const error_code&, const string& )
     {
+        FAIL( "Runloop should not invoke log handler when calling setter." );
         return error_code( );
     } ) );
 }

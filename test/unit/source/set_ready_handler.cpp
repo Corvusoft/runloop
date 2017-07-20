@@ -23,6 +23,7 @@ TEST_CASE( "Alter ready handler" )
     REQUIRE_NOTHROW( runloop.set_ready_handler( nullptr ) );
     REQUIRE_NOTHROW( runloop.set_ready_handler( [ ]( void )
     {
+        FAIL( "Runloop should not invoke ready handler when calling setter." );
         return error_code( );
     } ) );
 }

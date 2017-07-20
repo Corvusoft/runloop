@@ -28,10 +28,13 @@ TEST_CASE( "Launch task at timestamp with inactive loop" )
     REQUIRE_NOTHROW( runloop.launch_at( system_clock::now( ), nullptr, "test-key-value" ) );
     REQUIRE_NOTHROW( runloop.launch_at( system_clock::now( ), [ ]( void )
     {
+        FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     } ) );
     REQUIRE_NOTHROW( runloop.launch_at( system_clock::now( ), [ ]( void )
     {
+        FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" ) );
+    
 }

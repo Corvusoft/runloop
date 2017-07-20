@@ -38,6 +38,7 @@ TEST_CASE( "Call cancel with known task key on inactive loop" )
     RunLoop runloop;
     runloop.launch( [ ]( void )
     {
+        FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" );
     
@@ -55,6 +56,7 @@ TEST_CASE( "Call cancel with known task key pattern on inactive loop" )
     RunLoop runloop;
     runloop.launch( [ ]( void )
     {
+        FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" );
     

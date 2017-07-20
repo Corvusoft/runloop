@@ -24,10 +24,12 @@ TEST_CASE( "Launch task on event with inactive loop" )
     const function< error_code ( void ) > empty = nullptr;
     const function< error_code ( void ) > task = [ ]( void )
     {
+        FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     };
     const function< error_code ( void ) > event = [ ]( void )
     {
+        FAIL( "Runloop should not invoke event until start has been called." );
         return error_code( );
     };
     
