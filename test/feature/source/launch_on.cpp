@@ -25,19 +25,11 @@ using corvusoft::core::RunLoop;
 
 TEST_CASE( "Launching tasks on operating system signals" )
 {
-    int sigalrm_handler_called = 0;
-    
+    bool sigalrm_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_on( SIGINT, [ &sigalrm_handler_called, runloop ]( void )
+    runloop->launch_on( SIGINT, [ &sigalrm_handler_called ]( void )
     {
-        if ( sigalrm_handler_called == 2 ) runloop->stop( );
-        else sigalrm_handler_called++;
-        
-        runloop->launch( [ ]( void )
-        {
-            raise( SIGINT );
-            return error_code( );
-        } );
+        sigalrm_handler_called = true;
         return error_code( );
     } );
     
@@ -48,23 +40,27 @@ TEST_CASE( "Launching tasks on operating system signals" )
     } );
     
     error_code status = runloop->start( );
-    
     REQUIRE( status == error_code( ) );
-    REQUIRE( sigalrm_handler_called == 2 );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( sigalrm_handler_called == true );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }
 
 TEST_CASE( "Returning errors from signal handlers" )
 {
-    bool error_handler_called = false;
-    
     auto runloop = make_shared< RunLoop >( );
     runloop->launch_on( SIGINT, [ ]( void )
     {
         return make_error_code( std::errc::not_a_socket );
     }, "SIGALRM HANDLER" );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
+    
+    bool error_handler_called = false;
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & code, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key == "SIGALRM HANDLER" );
         REQUIRE( code == std::errc::not_a_socket );
@@ -77,25 +73,30 @@ TEST_CASE( "Returning errors from signal handlers" )
         raise( SIGINT );
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
 }
 
 TEST_CASE( "Throwing exceptions from signal handlers" )
 {
-    bool error_handler_called = false;
-    
     auto runloop = make_shared< RunLoop >( );
     runloop->launch_on( SIGINT, [ ]( void )
     {
         throw "error";
         return error_code( );
     }, "SIGALRM HANDLER" );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & code, const string & message )
+    
+    bool error_handler_called = false;
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & code, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key == "SIGALRM HANDLER" );
         REQUIRE( code == std::errc::operation_canceled );
@@ -108,8 +109,14 @@ TEST_CASE( "Throwing exceptions from signal handlers" )
         raise( SIGINT );
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
 }

@@ -68,16 +68,18 @@ namespace corvusoft
             return m_pimpl->is_suspended;
         }
         
-        void RunLoop::resume( void )
+        error_code RunLoop::resume( void )
         {
             m_pimpl->is_suspended = false;
             m_pimpl->pending_work.notify_all( );
+            return error_code( );
         }
         
-        void RunLoop::suspend( void )
+        error_code RunLoop::suspend( void )
         {
-            if ( is_stopped( ) or is_suspended( ) ) return;
+            if ( is_stopped( ) or is_suspended( ) ) return error_code( );
             m_pimpl->is_suspended = true;
+            return error_code( );
         }
         
         error_code RunLoop::stop( void )
@@ -86,48 +88,7 @@ namespace corvusoft
             m_pimpl->is_suspended = false;
             m_pimpl->pending_work.notify_all( );
             
-            return error_code( );
-        }
-        
-        error_code RunLoop::start( void )
-        {
-            if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
-            if ( is_stopped( ) == false ) return make_error_code( std::errc::operation_in_progress );
-            
-            m_pimpl->is_stopped = false;
-            m_pimpl->is_suspended = false;
-            
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            for ( unsigned int worker_count = 1; worker_count < m_pimpl->worker_limit; worker_count++ )
-                m_pimpl->workers.emplace_back( thread( m_pimpl->dispatch ) );
-                
-            guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
-            std::this_thread::yield( );
-            
             error_code status = error_code( );
-            if ( m_pimpl->ready_handler not_eq nullptr ) try
-                {
-                    status = m_pimpl->ready_handler( );
-                }
-                catch ( const exception& ex )
-                {
-                    status = make_error_code( std::errc::operation_canceled );
-                    m_pimpl->error( status, "std::exception raised when calling ready handler: " + std::string( ex.what( ) ) );
-                }
-                catch ( ... )
-                {
-                    status = make_error_code( std::errc::operation_canceled );
-                    m_pimpl->error( status, "non-std::exception raised when calling ready handler." );
-                }
-                
-            if ( status == error_code( ) ) m_pimpl->dispatch( );
-            else
-            {
-                m_pimpl->error( status, "ready handler execution returned an unerror_code( )ful error condition." );
-                stop( );
-            }
-            
             try
             {
                 for ( auto& worker : m_pimpl->workers )
@@ -145,6 +106,76 @@ namespace corvusoft
             return status;
         }
         
+        error_code RunLoop::start( void )
+        {
+            if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
+            if ( is_stopped( ) == false ) return make_error_code( std::errc::operation_in_progress );
+            
+            m_pimpl->is_stopped = false;
+            m_pimpl->is_suspended = false;
+            
+            unique_lock< mutex > guard( m_pimpl->task_lock );
+            if ( m_pimpl->ready_handler )
+            {
+                TaskImpl work;
+                work.key = "corvusoft::core::runloop::ready_handler";
+                work.operation = m_pimpl->ready_handler;
+                m_pimpl->tasks.insert( m_pimpl->tasks.begin( ), work );
+            }
+            
+            for ( unsigned int worker_count = 0; worker_count < m_pimpl->worker_limit; worker_count++ )
+                m_pimpl->workers.emplace_back( thread( m_pimpl->dispatch ) );
+                
+            guard.unlock( );
+            m_pimpl->pending_work.notify_one( );
+            
+            return error_code( );
+        }
+        
+        error_code RunLoop::cancel( const string& key )
+        {
+            unique_lock< mutex > guard( m_pimpl->task_lock );
+            
+            if ( key.empty( ) ) m_pimpl->tasks.clear( );
+            else
+            {
+                const auto position = find_if( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ),
+                                               [ &key ]( const TaskImpl & task )
+                {
+                    return task.key == key;
+                } );
+                
+                if ( position not_eq m_pimpl->tasks.end( ) ) m_pimpl->tasks.erase( position );
+            }
+            
+            if ( guard.owns_lock( ) ) guard.unlock( );
+            m_pimpl->pending_work.notify_one( );
+            
+            return error_code( ); //return not_found as well.
+        }
+        
+        error_code RunLoop::cancel( const regex& key_pattern )
+        {
+            unique_lock< mutex > guard( m_pimpl->task_lock );
+            
+            m_pimpl->tasks.erase(
+                remove_if( m_pimpl->tasks.begin( ),
+                           m_pimpl->tasks.end( ),
+                           [ &key_pattern ]( const TaskImpl & task )
+            {
+                return regex_match( task.key, key_pattern );
+            } ),
+            m_pimpl->tasks.end( ) );
+            
+            if ( guard.owns_lock( ) ) guard.unlock( );
+            m_pimpl->pending_work.notify_one( );
+            
+            return error_code( ); //return not_found as well.
+        }
+        
+        /* add to documentation:
+         *  Wait will block until there are no more tasks to schedule, however tasks may still be inflight and not yet completed on return.
+         */
         error_code RunLoop::wait( const milliseconds& duration )
         {
             if ( is_stopped( ) ) return error_code( );
@@ -165,43 +196,6 @@ namespace corvusoft
             if ( guard.owns_lock( ) ) guard.unlock( );
             m_pimpl->pending_work.notify_one( );
             return error_code( );
-        }
-        
-        void RunLoop::cancel( const string& key )
-        {
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            
-            if ( key.empty( ) ) m_pimpl->tasks.clear( );
-            else
-            {
-                const auto position = find_if( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ),
-                                               [ &key ]( const TaskImpl & task )
-                {
-                    return task.key == key;
-                } );
-                
-                if ( position not_eq m_pimpl->tasks.end( ) ) m_pimpl->tasks.erase( position );
-            }
-            
-            if ( guard.owns_lock( ) ) guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
-        }
-        
-        void RunLoop::cancel( const regex& key_pattern )
-        {
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            
-            m_pimpl->tasks.erase(
-                remove_if( m_pimpl->tasks.begin( ),
-                           m_pimpl->tasks.end( ),
-                           [ &key_pattern ]( const TaskImpl & task )
-            {
-                return regex_match( task.key, key_pattern );
-            } ),
-            m_pimpl->tasks.end( ) );
-            
-            if ( guard.owns_lock( ) ) guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
         }
         
         void RunLoop::launch( const function< error_code ( void ) >& task, const string& key )

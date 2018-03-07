@@ -24,19 +24,22 @@ using corvusoft::core::RunLoop;
 TEST_CASE( "Ready handler" )
 {
     bool ready_handler_called = false;
-    
     auto runloop = make_shared< RunLoop >( );
     runloop->set_ready_handler( [ runloop, &ready_handler_called ]( void )
     {
         ready_handler_called = true;
         REQUIRE( runloop->is_stopped( ) == false );
         REQUIRE( runloop->is_suspended( ) == false );
-        runloop->stop( );
         return error_code( );
     } );
     
     error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
     
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
     REQUIRE( ready_handler_called == true );
 }
@@ -53,17 +56,21 @@ TEST_CASE( "Returning errors from the ready handler" )
     runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & code, const string & message )
     {
         error_handler_called = true;
-        REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
         REQUIRE( code == std::errc::connection_aborted );
+        REQUIRE( key == "corvusoft::core::runloop::ready_handler" );
         return error_code( );
     } );
     
     error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
     
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
-    REQUIRE( status == std::errc::connection_aborted );
-    REQUIRE( runloop->is_stopped( ) );
 }
 
 TEST_CASE( "Throwing exceptions from the ready handler" )
@@ -79,15 +86,19 @@ TEST_CASE( "Throwing exceptions from the ready handler" )
     runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & code, const string & message )
     {
         error_handler_called = true;
-        REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
         REQUIRE( code == std::errc::operation_canceled );
+        REQUIRE( key == "corvusoft::core::runloop::ready_handler" );
         return error_code( );
     } );
     
     error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
     
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
-    REQUIRE( status == std::errc::operation_canceled );
-    REQUIRE( runloop->is_stopped( ) );
 }

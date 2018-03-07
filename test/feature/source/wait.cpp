@@ -39,15 +39,15 @@ TEST_CASE( "Waiting for all tasks to complete execution" )
     runloop->launch( counter );
     runloop->launch( counter );
     runloop->launch( counter );
-    runloop->launch( [ runloop, &counter ]( void )
-    {
-        runloop->wait( );
-        runloop->stop( );
-        return error_code( );
-    } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
     REQUIRE( count == 3 );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
 }
 
@@ -72,14 +72,14 @@ TEST_CASE( "Waiting specified amount of time for tasks to complete execution" )
     runloop->launch_if( wont_fire, counter );
     runloop->launch_if( will_fire, counter );
     runloop->launch_if( wont_fire, counter );
-    runloop->launch( [ runloop, &counter ]( void )
-    {
-        runloop->wait( milliseconds( 250 ) );
-        runloop->stop( );
-        return error_code( );
-    } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( milliseconds( 250 ) );
+    REQUIRE( status == error_code( ) );
     REQUIRE( count == 1 );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
 }

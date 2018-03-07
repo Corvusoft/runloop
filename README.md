@@ -22,14 +22,10 @@ int main( const int, const char** )
     runloop->launch( counter );
     runloop->launch( counter );
     runloop->launch( counter );
-    runloop->launch( [ runloop ]( void )
-    {
-        runloop->wait( );
-        runloop->stop( );
-        return error_code( );
-    } );
 
     runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
 
     return EXIT_SUCCESS;
 }

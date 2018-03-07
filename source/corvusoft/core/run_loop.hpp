@@ -54,19 +54,19 @@ namespace corvusoft
                 
                 bool is_suspended( void ) const;
                 
-                void resume( void );
+                std::error_code resume( void );
                 
-                void suspend( void );
+                std::error_code suspend( void );
                 
                 std::error_code stop( void );
                 
                 std::error_code start( void );
                 
+                std::error_code cancel( const std::string& key = "" );
+                
+                std::error_code cancel( const std::regex& key_pattern );
+                
                 std::error_code wait( const std::chrono::milliseconds& duration = std::chrono::milliseconds::min( ) );
-                
-                void cancel( const std::string& key = "" );
-                
-                void cancel( const std::regex& key_pattern );
                 
                 void launch( const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 

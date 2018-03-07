@@ -34,18 +34,22 @@ TEST_CASE( "Launching tasks after a specific delay" )
     const auto datestamp = system_clock::now( ) + delay;
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_in( delay, [ &task_called, datestamp, runloop ]( void )
+    runloop->launch_in( delay, [ &task_called, datestamp ]( void )
     {
-        runloop->stop( );
         task_called = true;
         REQUIRE( system_clock::now( ) > datestamp );
         return error_code( );
     } );
     
     error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
     
+    status = runloop->wait( );
     REQUIRE( status == error_code( ) );
     REQUIRE( task_called == true );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }
 
 TEST_CASE( "Returning errors from tasks" )
@@ -54,9 +58,8 @@ TEST_CASE( "Returning errors from tasks" )
     const auto delay = milliseconds( 500 );
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & status, const string & message )
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & status, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
@@ -68,8 +71,14 @@ TEST_CASE( "Returning errors from tasks" )
     {
         return make_error_code( std::errc::already_connected );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
 }
@@ -80,9 +89,8 @@ TEST_CASE( "Throwing exceptions from tasks" )
     const auto delay = milliseconds( 500 );
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & status, const string & message )
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & status, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
@@ -95,8 +103,14 @@ TEST_CASE( "Throwing exceptions from tasks" )
         throw invalid_argument( "bad" );
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->stop( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
 }

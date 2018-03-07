@@ -77,7 +77,12 @@ namespace corvusoft
                 
                 const std::function< bool ( void ) > until_work_available = [ this ]( void )
                 {
-                    return ( is_stopped or not tasks.empty( ) or raised_signal ) and not is_suspended;
+                    if ( is_suspended       ) return false;
+                    if ( is_stopped         ) return true;
+                    if ( raised_signal      ) return true;
+                    if ( not tasks.empty( ) ) return true;
+                    
+                    return false;
                 };
                 
                 const std::function< void ( void ) > dispatch = [ this ]( void )

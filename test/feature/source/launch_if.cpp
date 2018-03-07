@@ -35,104 +35,79 @@ TEST_CASE( "Launching tasks when a condition is met" )
         task_called++;
         return error_code( );
     } );
-    runloop->launch( [ &runloop ]( void )
+    
+    runloop->launch_if( true, [ &task_called ]( void )
     {
-        runloop->wait( );
-        runloop->stop( );
+        task_called++;
         return error_code( );
     } );
     
     error_code status = runloop->start( );
-    
     REQUIRE( status == error_code( ) );
-    REQUIRE( task_called == 0 );
     
-    runloop->launch_if( true, [ &task_called, runloop ]( void )
-    {
-        task_called++;
-        runloop->stop( );
-        return error_code( );
-    } );
-    
-    status = runloop->start( );
-    
+    status = runloop->wait( );
     REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 1 );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }
 
 TEST_CASE( "Launching tasks when an event occurs" )
 {
+    int task_called = 0;
     auto runloop = make_shared< RunLoop >( );
     
-    int task_called = 0;
-    function< error_code ( void ) > event = [ ]( void )
+    function< error_code ( void ) > successful_event = [ ]( void )
     {
         return error_code( );
     };
-    
-    runloop->launch_if( event, [ &task_called, runloop ]( void )
+    runloop->launch_if( successful_event, [ &task_called ]( void )
     {
         task_called++;
-        runloop->stop( );
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
-    REQUIRE( status == error_code( ) );
-    REQUIRE( task_called == 1 );
     
-    task_called = 0;
-    event = [ ]( void )
+    function< error_code ( void ) > not_permitted_event = [ ]( void )
     {
         return make_error_code( std::errc::operation_not_permitted );
     };
-    
-    runloop->launch_if( event, [ &task_called ]( void )
+    runloop->launch_if( not_permitted_event, [ &task_called ]( void )
     {
         task_called++;
         return error_code( );
     } );
-    runloop->launch( [ &runloop ]( void )
-    {
-        runloop->wait( milliseconds( 500 ) );
-        runloop->stop( );
-        return error_code( );
-    } );
-    status = runloop->start( );
     
-    REQUIRE( status == error_code( ) );
-    REQUIRE( task_called == 0 );
     
-    task_called = 0;
-    event = [ ]( void )
+    function< error_code ( void ) > operation_canceled_event = [ ]( void )
     {
         return make_error_code( std::errc::operation_canceled );
     };
-    
-    runloop->launch_if( event, [ &task_called ]( void )
+    runloop->launch_if( operation_canceled_event, [ &task_called ]( void )
     {
         task_called++;
         return error_code( );
     } );
-    runloop->launch( [ &runloop ]( void )
-    {
-        runloop->wait( );
-        runloop->stop( );
-        return error_code( );
-    } );
-    status = runloop->start( );
     
+    
+    error_code status = runloop->start( );
     REQUIRE( status == error_code( ) );
-    REQUIRE( task_called == 0 );
+    
+    status = runloop->wait( milliseconds( 100 ) );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( task_called == 1 );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }
 
 TEST_CASE( "Returning errors from task events" )
 {
     bool error_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & status, const string & message )
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & status, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
@@ -148,19 +123,24 @@ TEST_CASE( "Returning errors from task events" )
     {
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }
 
 TEST_CASE( "Throwing exceptions from task events" )
 {
     bool error_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_error_handler( [ runloop, &error_handler_called ]( const string & key, const error_code & status, const string & message )
+    runloop->set_error_handler( [ &error_handler_called ]( const string & key, const error_code & status, const string & message )
     {
-        runloop->stop( );
         error_handler_called = true;
         REQUIRE( key.empty( ) );
         REQUIRE( not message.empty( ) );
@@ -177,8 +157,14 @@ TEST_CASE( "Throwing exceptions from task events" )
     {
         return error_code( );
     } );
-    error_code status = runloop->start( );
     
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    
+    status = runloop->wait( );
     REQUIRE( status == error_code( ) );
     REQUIRE( error_handler_called == true );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
 }

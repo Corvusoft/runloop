@@ -1,6 +1,5 @@
 //System Includes
 #include <memory>
-#include <functional>
 #include <system_error>
 
 //Project Includes
@@ -10,7 +9,6 @@
 #include <catch.hpp>
 
 //System Namespaces
-using std::function;
 using std::error_code;
 using std::make_shared;
 
@@ -22,22 +20,24 @@ using corvusoft::core::RunLoop;
 TEST_CASE( "Calling suspend twice" )
 {
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch( [ runloop ]( void )
-    {
-        REQUIRE( runloop->is_stopped( ) == false );
-        REQUIRE( runloop->is_suspended( ) == false );
-        
-        runloop->suspend( );
-        REQUIRE( runloop->is_stopped( ) == false );
-        REQUIRE( runloop->is_suspended( ) == true );
-        
-        runloop->suspend( );
-        REQUIRE( runloop->is_stopped( ) == false );
-        REQUIRE( runloop->is_suspended( ) == true );
-        
-        runloop->stop( );
-        return error_code( );
-    } );
     
-    REQUIRE( runloop->start( ) == error_code( ) );
+    error_code status = runloop->start( );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( runloop->is_stopped( ) == false );
+    REQUIRE( runloop->is_suspended( ) == false );
+    
+    status = runloop->suspend( );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( runloop->is_stopped( ) == false );
+    REQUIRE( runloop->is_suspended( ) == true );
+    
+    status = runloop->suspend( );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( runloop->is_stopped( ) == false );
+    REQUIRE( runloop->is_suspended( ) == true );
+    
+    status = runloop->stop( );
+    REQUIRE( status == error_code( ) );
+    REQUIRE( runloop->is_stopped( ) == true );
+    REQUIRE( runloop->is_suspended( ) == false );
 }
