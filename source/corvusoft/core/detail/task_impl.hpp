@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved.
+ * Copyright 2013-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
 #ifndef _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H

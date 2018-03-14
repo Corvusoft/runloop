@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.1.0 FATAL_ERROR )
 
 project( "runloop" VERSION 1.0.0 LANGUAGES CXX )
-message( "Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved." )
+message( "Copyright 2013-2018, Corvusoft Ltd, All Rights Reserved." )
 
 #
 # Dependencies

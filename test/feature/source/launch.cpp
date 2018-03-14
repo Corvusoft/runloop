@@ -122,7 +122,7 @@ TEST_CASE( "Launching tasks on a single thread." )
 //     REQUIRE( error_handler_called == true );
 // }
 
-// TEST_CASE( "Throwing exceptions from launched tasks" )
+// TEST_CASE( "Throwing exceptions from launched tasks." )
 // {
 //     auto runloop = make_shared< RunLoop >( );
 //     runloop->launch( [ ]( void )

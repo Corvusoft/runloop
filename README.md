@@ -34,7 +34,7 @@ int main( const int, const char** )
 License
 -------
 
-&copy; 2016-2018 Corvusoft Limited, United Kingdom. All rights reserved.
+&copy; 2013-2018 Corvusoft Limited, United Kingdom. All rights reserved.
 
 The Runloop framework is dual licensed; See [LICENSE](LICENSE) for full details.
 
