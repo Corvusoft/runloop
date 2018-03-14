@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Corvusoft Ltd, All Rights Reserved.
+ * Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
 #ifndef _CORVUSOFT_CORE_RUN_LOOP_H
@@ -54,27 +54,29 @@ namespace corvusoft
                 
                 bool is_suspended( void ) const;
                 
-                std::error_code resume( void );
+                void resume( void );
                 
-                std::error_code suspend( void );
+                void suspend( void );
                 
-                std::error_code stop( void );
+                void stop( void );
                 
-                std::error_code start( void );
+                void start( void );
                 
-                std::error_code cancel( const std::string& key = "" );
+                void cancel( const std::string& key = "" );
                 
-                std::error_code cancel( const std::regex& key_pattern );
+                void cancel( const std::regex& key_pattern );
                 
-                std::error_code wait( const std::chrono::milliseconds& duration = std::chrono::milliseconds::min( ) );
+                void wait( const std::string& key = "" );
+                
+                void wait( const std::regex& key_pattern );
+                
+                void wait( const std::chrono::milliseconds& duration );
                 
                 void launch( const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
-                void launch_on( const signal_t value, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
-                
                 void launch_if( const bool condition, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
-                void launch_if( const std::function< std::error_code ( void ) >& event, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch_on( const signal_t value, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
                 void launch_in( const std::chrono::milliseconds& delay, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
                 
@@ -87,9 +89,9 @@ namespace corvusoft
                 
                 void set_ready_handler( const std::function< std::error_code ( void ) >& value );
                 
-                void set_log_handler( const std::function< std::error_code ( const std::error_code&, const std::string& ) >& value );
+                void set_error_handler( const std::function< void ( const std::string&, const std::error_code&, const std::string& ) >& value );
                 
-                void set_error_handler( const std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) >& value );
+                void set_log_handler( const std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) >& value );
                 
                 //Operators
                 

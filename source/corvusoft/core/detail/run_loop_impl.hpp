@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Corvusoft Ltd, All Rights Reserved.
+ * Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
 #ifndef _CORVUSOFT_CORE_DETAIL_RUN_LOOP_IMPL_H
@@ -7,7 +7,6 @@
 
 //System Includes
 #include <map>
-#include <tuple>
 #include <mutex>
 #include <string>
 #include <chrono>
@@ -17,10 +16,10 @@
 #include <memory>
 #include <ciso646>
 #include <csignal>
+#include <algorithm>
 #include <stdexcept>
 #include <functional>
 #include <system_error>
-#include <algorithm>
 #include <condition_variable>
 
 //Project Includes
@@ -50,45 +49,45 @@ namespace corvusoft
             
             struct RunLoopImpl
             {
-                static void signal_handler( const int value )
-                {
-                    raised_signal = value;
-                }
-                
                 std::mutex task_lock { };
                 
                 std::condition_variable pending_work { };
-                
-                std::atomic< bool > is_stopped { true };
-                
-                std::atomic< bool > is_suspended { false };
                 
                 std::vector< TaskImpl > tasks { };
                 
                 std::vector< std::thread > workers { };
                 
+                std::atomic< bool > is_stopped { true };
+                
+                std::atomic< bool > is_suspended { false };
+                
+                std::map< int, TaskImpl > signal_handlers { };
+                
                 unsigned int worker_limit = std::thread::hardware_concurrency( );
                 
                 std::function< std::error_code ( void ) > ready_handler = nullptr;
                 
-                std::function< std::error_code ( const std::error_code&, const std::string& ) > log_handler = nullptr;
+                std::function< void ( const std::string&, const std::error_code&, const std::string& ) > error_handler = nullptr;
                 
-                std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) > error_handler = nullptr;
+                std::function< std::error_code ( const std::string&, const std::error_code&, const std::string& ) > log_handler = nullptr;
+                
+                static void signal_handler( const int value )
+                {
+                    raised_signal = value;
+                }
                 
                 const std::function< bool ( void ) > until_work_available = [ this ]( void )
                 {
-                    if ( is_suspended       ) return false;
-                    if ( is_stopped         ) return true;
-                    if ( raised_signal      ) return true;
-                    if ( not tasks.empty( ) ) return true;
-                    
-                    return false;
+                    if ( is_suspended ) return false;
+                    if ( is_stopped or raised_signal ) return true;
+                    return std::any_of( tasks.begin( ), tasks.end( ), [ ]( auto task )
+                    {
+                        return not task.inflight and task.timeout <= std::chrono::system_clock::now( );
+                    } );
                 };
                 
                 const std::function< void ( void ) > dispatch = [ this ]( void )
                 {
-                    TaskImpl task { };
-                    std::vector< TaskImpl >::iterator position { };
                     std::unique_lock< std::mutex > guard( task_lock );
                     
                     while ( is_stopped == false )
@@ -98,124 +97,102 @@ namespace corvusoft
                         if ( is_stopped ) break;
                         if ( guard.owns_lock( ) and not is_suspended )
                         {
-                            position = std::find_if( tasks.begin( ), tasks.end( ), is_ready );
-                            if ( position not_eq tasks.end( ) )
+                            schedule_signal_handlers( );
+                            
+                            auto position = std::find_if( tasks.begin( ), tasks.end( ), [ ]( auto task )
                             {
-                                std::swap( task, *position );
-                                tasks.erase( position );
-                                
-                                guard.unlock( );
-                                pending_work.notify_one( );
-                                
-                                if ( task.error.code == std::error_code( ) ) launch( task );
-                                if ( task.error.code not_eq std::error_code( ) ) error( task );
-                            }
-                            else
-                            {
-                                guard.unlock( );
-                                pending_work.notify_one( );
-                            }
+                                return not task.inflight and task.timeout <= std::chrono::system_clock::now( );
+                            } );
+                            if ( position == tasks.end( ) ) continue;
+                            
+                            position->inflight = true;
+                            auto task = *position;
+                            
+                            guard.unlock( );
+                            pending_work.notify_one( );
+                            
+                            auto status = launch( task );
                             
                             guard.lock( );
+                            position = std::find_if( tasks.begin( ), tasks.end( ), [ task ]( auto entry )
+                            {
+                                return entry.key == task.key;
+                            } );
+                            if ( position == tasks.end( ) ) continue;
+                            
+                            if ( status == std::errc::resource_unavailable_try_again )
+                            {
+                                position->inflight = false;
+                                position->timeout = std::chrono::system_clock::now( );
+                            }
+                            else tasks.erase( position );
                         }
                     }
                     
                     if ( guard.owns_lock( ) ) guard.unlock( );
-                    pending_work.notify_one( );
+                    pending_work.notify_all( );
                 };
                 
-                static bool is_ready( TaskImpl& task )
+                void schedule_signal_handlers( void )
+                {
+                    auto value = raised_signal.exchange( 0 );
+                    if ( not value ) return;
+                    
+                    auto iterator = signal_handlers.find( value );
+                    if ( iterator == signal_handlers.end( ) ) return;
+                    
+                    tasks.insert( tasks.begin( ), iterator->second );
+                }
+                
+                std::error_code launch( TaskImpl& task )
                 try
                 {
-                    if ( task.condition == nullptr ) return true;
-                    
-                    task.error.code = task.condition( );
-                    
-                    if ( task.error.code == std::error_code( ) )                 return true;
-                    if ( task.error.code == std::errc::operation_canceled )      return true;
-                    if ( task.error.code == std::errc::operation_not_permitted ) return false;
-                    
-                    task.error.message = "task precondition failed with an unsuccessful error state.";
-                    return true;
+                    auto status = task.operation( );
+                    if ( status not_eq std::errc::resource_unavailable_try_again )
+                        error( task.key, status, "task execution failed." );
+                        
+                    return status;
                 }
                 catch ( const std::exception& ex )
                 {
-                    task.error.code = std::make_error_code( std::errc::operation_canceled );
-                    task.error.message = "std::exception raised when calling task precondition: " + std::string( ex.what( ) );
-                    return true;
+                    auto status = std::error_code( );
+                    error( task.key, status, ex.what( ) );
+                    return status;
                 }
                 catch ( ... )
                 {
-                    task.error.code = std::make_error_code( std::errc::operation_canceled );
-                    task.error.message = "non-std::exception raised when calling task precondition.";
-                    return true;
+                    auto status = std::error_code( );
+                    error( task.key, status, "non-std::exception raised when calling task execution." );
+                    return status;
                 }
                 
-                void launch( TaskImpl& task )
+                void error( const std::string& key, const std::error_code& status, const std::string& message )
                 try
                 {
-                    task.error.code = task.operation( );
-                    if ( task.error.code not_eq std::error_code( ) )
-                        task.error.message = "task execution failed with an unsuccessful error state.";
+                    if ( error_handler == nullptr ) return;
+                    error_handler( key, status, message );
                 }
                 catch ( const std::exception& ex )
                 {
-                    task.error.message = ex.what( );
-                    task.error.code = std::make_error_code( std::errc::operation_canceled );
-                    error( task );
+                    log( key, status, message );
+                    log( key, status, "std::exception raised when calling error handler: " + std::string( ex.what( ) ) );
                 }
                 catch ( ... )
                 {
-                    task.error.code = std::make_error_code( std::errc::operation_canceled );
-                    task.error.message = "non-std::exception raised when calling task execution.";
-                    error( task );
+                    log( key, status, message );
+                    log( key, status, "non-std::exception raised when calling error handler." );
                 }
                 
-                void error( const TaskImpl& task )
-                {
-                    error( task.key, task.error.code, task.error.message );
-                }
-                
-                void error( const std::error_code& code, const std::string& message )
-                {
-                    error( "", code, message );
-                }
-                
-                void error( const std::string& key, const std::error_code& code, const std::string& message )
+                void log( const std::string& key, const std::error_code& code, const std::string& message )
                 try
                 {
-                    if ( error_handler not_eq nullptr )
+                    if ( log_handler == nullptr ) return;
+                    
+                    auto status = log_handler( key, code, message );
+                    if ( status )
                     {
-                        const std::error_code status = error_handler( key, code, message );
-                        if ( status not_eq std::error_code( ) )
-                        {
-                            log( "task '" + key + "' failed with '" + message + "'.", code );
-                            log( "error handler failed with unsuccessful error state.", status );
-                        }
-                    }
-                }
-                catch ( const std::exception& ex )
-                {
-                    log( "task '" + key + "' failed with '" + message + "'.", code );
-                    log( "std::exception raised when calling error handler: " + std::string( ex.what( ) ) );
-                }
-                catch ( ... )
-                {
-                    log( "task '" + key + "' failed with '" + message + "'.", code );
-                    log( "non-std::exception raised when calling error handler." );
-                }
-                
-                void log( const std::string& message, const std::error_code& code = std::error_code( ) )
-                try
-                {
-                    if ( log_handler not_eq nullptr )
-                    {
-                        const auto status = log_handler( code, message );
-                        if ( status not_eq std::error_code( ) )
-                        {
-                            fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
-                            fprintf( stderr, "[%i %s] log handler failed with unsuccessful error state.", status.value( ), status.message( ).data( ) );
-                        }
+                        fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
+                        fprintf( stderr, "[%i %s] log handler failed with unsuccessful error state.", status.value( ), status.message( ).data( ) );
                     }
                 }
                 catch ( const std::exception& ex )
@@ -227,12 +204,6 @@ namespace corvusoft
                 {
                     fprintf( stderr, "[%i %s] %s", code.value( ), code.message( ).data( ), message.data( ) );
                     fprintf( stderr, "non-std::exception raised when attempting to log failure." );
-                }
-                
-                void log( const TaskImpl& task, const std::string& message, const std::error_code& code )
-                {
-                    log( message, code );
-                    log( task.error.message, task.error.code );
                 }
             };
         }

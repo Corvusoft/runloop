@@ -27,7 +27,7 @@ TEST_CASE( "Launching tasks on operating system signals" )
 {
     bool sigalrm_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_on( SIGINT, [ &sigalrm_handler_called ]( void )
+    runloop->launch_on( SIGUSR1, [ &sigalrm_handler_called ]( void )
     {
         sigalrm_handler_called = true;
         return error_code( );
@@ -35,7 +35,7 @@ TEST_CASE( "Launching tasks on operating system signals" )
     
     runloop->launch( [ ]( void )
     {
-        raise( SIGINT );
+        raise( SIGUSR1 );
         return error_code( );
     } );
     
@@ -53,7 +53,7 @@ TEST_CASE( "Launching tasks on operating system signals" )
 TEST_CASE( "Returning errors from signal handlers" )
 {
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_on( SIGINT, [ ]( void )
+    runloop->launch_on( SIGUSR1, [ ]( void )
     {
         return make_error_code( std::errc::not_a_socket );
     }, "SIGALRM HANDLER" );
@@ -70,7 +70,7 @@ TEST_CASE( "Returning errors from signal handlers" )
     
     runloop->set_ready_handler( [ ]( void )
     {
-        raise( SIGINT );
+        raise( SIGUSR1 );
         return error_code( );
     } );
     
@@ -88,7 +88,7 @@ TEST_CASE( "Returning errors from signal handlers" )
 TEST_CASE( "Throwing exceptions from signal handlers" )
 {
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_on( SIGINT, [ ]( void )
+    runloop->launch_on( SIGUSR1, [ ]( void )
     {
         throw "error";
         return error_code( );
@@ -106,7 +106,7 @@ TEST_CASE( "Throwing exceptions from signal handlers" )
     
     runloop->set_ready_handler( [ ]( void )
     {
-        raise( SIGINT );
+        raise( SIGUSR1 );
         return error_code( );
     } );
     

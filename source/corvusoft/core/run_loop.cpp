@@ -1,15 +1,13 @@
 /*
- * Copyright 2016-2017, Corvusoft Ltd, All Rights Reserved.
+ * Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
 //System Includes
 #include <mutex>
 #include <vector>
 #include <thread>
-#include <memory>
 #include <algorithm>
 #include <stdexcept>
-#include <functional>
 #include <condition_variable>
 
 //Project Includes
@@ -20,24 +18,22 @@
 //External Includes
 
 //System Namespaces
+using std::mutex;
 using std::regex;
-using std::regex_match;
 using std::thread;
 using std::vector;
 using std::string;
+using std::any_of;
 using std::function;
-using std::exception;
-using std::error_code;
-using std::make_error_code;
-using std::find_if;
 using std::remove_if;
-using std::mutex;
-using std::unique_ptr;
+using std::error_code;
+using std::regex_match;
 using std::unique_lock;
 using std::condition_variable;
 using std::chrono::time_point;
 using std::chrono::system_clock;
 using std::chrono::milliseconds;
+using std::regex_constants::icase;
 
 //Project Namespaces
 using corvusoft::core::detail::RunLoopImpl;
@@ -68,27 +64,23 @@ namespace corvusoft
             return m_pimpl->is_suspended;
         }
         
-        error_code RunLoop::resume( void )
+        void RunLoop::resume( void )
         {
             m_pimpl->is_suspended = false;
             m_pimpl->pending_work.notify_all( );
-            return error_code( );
         }
         
-        error_code RunLoop::suspend( void )
+        void RunLoop::suspend( void )
         {
-            if ( is_stopped( ) or is_suspended( ) ) return error_code( );
             m_pimpl->is_suspended = true;
-            return error_code( );
         }
         
-        error_code RunLoop::stop( void )
+        void RunLoop::stop( void )
         {
             m_pimpl->is_stopped = true;
             m_pimpl->is_suspended = false;
             m_pimpl->pending_work.notify_all( );
             
-            error_code status = error_code( );
             try
             {
                 for ( auto& worker : m_pimpl->workers )
@@ -96,172 +88,128 @@ namespace corvusoft
             }
             catch ( const std::system_error& se )
             {
-                m_pimpl->log( "failed graceful halt on corvusoft::core::runloop: " + string( se.what( ) ), se.code( ) );
-                status = se.code( );
+                m_pimpl->log( "corvusoft::core::runloop::stop", se.code( ), "failed graceful halt on corvusoft::core::runloop: " + string( se.what( ) ) );
             }
             
             m_pimpl->tasks.clear( );
             m_pimpl->workers.clear( );
-            
-            return status;
         }
         
-        error_code RunLoop::start( void )
+        void RunLoop::start( void )
         {
-            if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
-            if ( is_stopped( ) == false ) return make_error_code( std::errc::operation_in_progress );
+            if ( is_suspended( ) or is_stopped( ) == false ) return;
             
             m_pimpl->is_stopped = false;
             m_pimpl->is_suspended = false;
             
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            if ( m_pimpl->ready_handler )
-            {
-                TaskImpl work;
-                work.key = "corvusoft::core::runloop::ready_handler";
-                work.operation = m_pimpl->ready_handler;
-                m_pimpl->tasks.insert( m_pimpl->tasks.begin( ), work );
-            }
+            launch( m_pimpl->ready_handler, "corvusoft::core::runloop::ready_handler" );
             
+            unique_lock< mutex > guard( m_pimpl->task_lock );
             for ( unsigned int worker_count = 0; worker_count < m_pimpl->worker_limit; worker_count++ )
                 m_pimpl->workers.emplace_back( thread( m_pimpl->dispatch ) );
-                
             guard.unlock( );
             m_pimpl->pending_work.notify_one( );
-            
-            return error_code( );
         }
         
-        error_code RunLoop::cancel( const string& key )
+        void RunLoop::cancel( const string& key )
         {
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            
-            if ( key.empty( ) ) m_pimpl->tasks.clear( );
+            if ( key.empty( ) )
+                cancel( regex( ".*", icase ) );
             else
-            {
-                const auto position = find_if( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ),
-                                               [ &key ]( const TaskImpl & task )
-                {
-                    return task.key == key;
-                } );
-                
-                if ( position not_eq m_pimpl->tasks.end( ) ) m_pimpl->tasks.erase( position );
-            }
-            
-            if ( guard.owns_lock( ) ) guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
-            
-            return error_code( ); //return not_found as well.
+                cancel( regex( "^" + key + "$", icase ) );
         }
         
-        error_code RunLoop::cancel( const regex& key_pattern )
+        void RunLoop::cancel( const regex& key_pattern )
         {
             unique_lock< mutex > guard( m_pimpl->task_lock );
-            
-            m_pimpl->tasks.erase(
-                remove_if( m_pimpl->tasks.begin( ),
-                           m_pimpl->tasks.end( ),
-                           [ &key_pattern ]( const TaskImpl & task )
+            m_pimpl->tasks.erase( remove_if( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ), [ key_pattern ]( auto task )
             {
                 return regex_match( task.key, key_pattern );
-            } ),
-            m_pimpl->tasks.end( ) );
+            } ), m_pimpl->tasks.end( ) );
             
             if ( guard.owns_lock( ) ) guard.unlock( );
             m_pimpl->pending_work.notify_one( );
-            
-            return error_code( ); //return not_found as well.
         }
         
-        /* add to documentation:
-         *  Wait will block until there are no more tasks to schedule, however tasks may still be inflight and not yet completed on return.
-         */
-        error_code RunLoop::wait( const milliseconds& duration )
+        void RunLoop::wait( const string& key )
         {
-            if ( is_stopped( ) ) return error_code( );
-            if ( is_suspended( ) ) return make_error_code( std::errc::operation_would_block );
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            
-            if ( duration not_eq milliseconds::min( ) )
-            {
-                const auto timeout = system_clock::now( ) + duration;
-                m_pimpl->pending_work.wait( guard, [ this, timeout ]
-                {
-                    return m_pimpl->tasks.empty( ) or m_pimpl->is_stopped or timeout <= system_clock::now( );
-                } );
-            }
+            if ( key.empty( ) )
+                wait( regex( ".*", icase ) );
             else
-                m_pimpl->pending_work.wait( guard, [ this ] { return m_pimpl->tasks.empty( ) or m_pimpl->is_stopped; } );
-                
+                wait( regex( "^" + key + "$", icase ) );
+        }
+        
+        void RunLoop::wait( const regex& key_pattern )
+        {
+            unique_lock< mutex > guard( m_pimpl->task_lock );
+            m_pimpl->pending_work.wait( guard, [ this, key_pattern ]
+            {
+                const auto found = any_of( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ), [ key_pattern ]( auto task )
+                {
+                    return regex_match( task.key, key_pattern );
+                } );
+                return not found or m_pimpl->is_stopped;
+            } );
+            
             if ( guard.owns_lock( ) ) guard.unlock( );
             m_pimpl->pending_work.notify_one( );
-            return error_code( );
+        }
+        
+        void RunLoop::wait( const milliseconds& duration )
+        {
+            const auto timeout = system_clock::now( ) + duration;
+            
+            unique_lock< mutex > guard( m_pimpl->task_lock );
+            m_pimpl->pending_work.wait( guard, [ this, timeout ]
+            {
+                return m_pimpl->tasks.empty( ) or m_pimpl->is_stopped or timeout <= system_clock::now( );
+            } );
+            
+            if ( guard.owns_lock( ) ) guard.unlock( );
+            m_pimpl->pending_work.notify_one( );
         }
         
         void RunLoop::launch( const function< error_code ( void ) >& task, const string& key )
         {
-            static const std::function< std::error_code ( void ) > event = nullptr;
-            launch_if( event, task, key );
-        }
-        
-        void RunLoop::launch_on( const signal_t value, const function< error_code ( void ) >& task, const string& key )
-        {
-            if ( task == nullptr )
-            {
-                signal( value, SIG_DFL );
-                return;
-            }
-            
-            signal( value, detail::RunLoopImpl::signal_handler );
-            
-            const function< error_code ( void ) > event = [ value ]
-            {
-                signal_t expected = value;
-                static const int desired = 0;
-                const auto signal_raised = detail::raised_signal.compare_exchange_strong( expected, desired );
-                return ( signal_raised ) ? error_code( ) : make_error_code( std::errc::operation_not_permitted );
-            };
-            
-            const function< error_code ( void ) > reaction = [ this, value, task, key ]
-            {
-                const auto status = task( );
-                launch_on( value, task, key );
-                return status;
-            };
-            
-            launch_if( event, reaction, key );
+            launch_at( system_clock::now( ), task, key );
         }
         
         void RunLoop::launch_if( const bool condition, const function< error_code ( void ) >& task, const string& key )
         {
-            if ( condition == true ) launch( task, key );
+            if ( condition ) launch( task, key );
         }
         
-        void RunLoop::launch_if( const function< error_code ( void ) >& event, const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch_on( const signal_t value, const function< error_code ( void ) >& task, const string& key )
+        {
+            TaskImpl work;
+            work.key = key;
+            work.operation = task;
+            m_pimpl->signal_handlers[ value ] = work;
+            
+            if ( task == nullptr )
+                signal( value, SIG_DFL );
+            else
+                signal( value, detail::RunLoopImpl::signal_handler );
+        }
+        
+        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( void ) >& task, const string& key )
+        {
+            launch_at( system_clock::now( ) + delay, task, key );
+        }
+        
+        void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( void ) >& task, const string& key )
         {
             if ( task == nullptr ) return;
             
             TaskImpl work;
             work.key = key;
             work.operation = task;
-            work.condition = event;
+            work.timeout = timestamp;
             
             unique_lock< mutex > guard( m_pimpl->task_lock );
             m_pimpl->tasks.push_back( work );
             if ( guard.owns_lock( ) ) guard.unlock( );
             m_pimpl->pending_work.notify_one( );
-        }
-        
-        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( void ) >& task, const string& key )
-        {
-            const auto timestamp = system_clock::now( ) + delay;
-            launch_at( timestamp, task, key );
-        }
-        
-        void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( void ) >& task, const string& key )
-        {
-            const function< error_code ( void ) > event = [ timestamp ] { return ( timestamp <= system_clock::now( ) ) ? error_code( ) : make_error_code( std::errc::operation_not_permitted ); };
-            launch_if( event, task, key );
         }
         
         void RunLoop::set_worker_limit( const unsigned int value )
@@ -274,18 +222,14 @@ namespace corvusoft
             m_pimpl->ready_handler = value;
         }
         
-        void RunLoop::set_log_handler( const function< error_code ( const error_code&, const string& ) >& value )
+        void RunLoop::set_error_handler( const function< void ( const string&, const error_code&, const string& ) >& value )
         {
-            suspend( );
-            m_pimpl->log_handler = value;
-            resume( );
+            m_pimpl->error_handler = value;
         }
         
-        void RunLoop::set_error_handler( const function< error_code ( const string&, const error_code&, const string& ) >& value )
+        void RunLoop::set_log_handler( const function< error_code ( const string&, const error_code&, const string& ) >& value )
         {
-            suspend( );
-            m_pimpl->error_handler = value;
-            resume( );
+            m_pimpl->log_handler = value;
         }
     }
 }

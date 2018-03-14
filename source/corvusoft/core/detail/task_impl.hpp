@@ -1,11 +1,12 @@
 /*
- * Copyright 2013-2017, Corvusoft Ltd, All Rights Reserved.
+ * Copyright 2016-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
 #ifndef _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H
 #define _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H 1
 
 //System Includes
+#include <chrono>
 #include <string>
 #include <functional>
 #include <system_error>
@@ -26,18 +27,13 @@ namespace corvusoft
     {
         struct TaskImpl
         {
-            struct
-            {
-                std::string message = "";
-                
-                std::error_code code { };
-            } error { };
+            bool inflight = false;
             
             std::string key = "";
             
-            std::function< std::error_code ( void ) > condition = nullptr;
-            
             std::function< std::error_code ( void ) > operation = nullptr;
+            
+            std::chrono::time_point< std::chrono::system_clock > timeout { };
         };
     }
 }
