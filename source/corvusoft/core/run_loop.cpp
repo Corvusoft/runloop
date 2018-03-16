@@ -141,32 +141,28 @@ namespace corvusoft
         
         void RunLoop::wait( const regex& key_pattern )
         {
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            m_pimpl->pending_work.wait( guard, [ this, key_pattern ]
+            const auto predicate = [ this, key_pattern ]
             {
                 const auto found = any_of( m_pimpl->tasks.begin( ), m_pimpl->tasks.end( ), [ key_pattern ]( auto task )
                 {
                     return regex_match( task.key, key_pattern );
                 } );
+                
                 return not found or m_pimpl->is_stopped;
-            } );
+            };
             
-            if ( guard.owns_lock( ) ) guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
+            m_pimpl->wait( predicate );
         }
         
         void RunLoop::wait( const milliseconds& duration )
         {
             const auto timeout = system_clock::now( ) + duration;
-            
-            unique_lock< mutex > guard( m_pimpl->task_lock );
-            m_pimpl->pending_work.wait( guard, [ this, timeout ]
+            const auto predicate = [ this, timeout ]
             {
                 return m_pimpl->tasks.empty( ) or m_pimpl->is_stopped or timeout <= system_clock::now( );
-            } );
+            };
             
-            if ( guard.owns_lock( ) ) guard.unlock( );
-            m_pimpl->pending_work.notify_one( );
+            m_pimpl->wait( predicate );
         }
         
         void RunLoop::launch( const function< error_code ( void ) >& task, const string& key )

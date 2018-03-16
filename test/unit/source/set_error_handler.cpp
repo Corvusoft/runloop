@@ -19,7 +19,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Alter error handler" )
+TEST_CASE( "Alter error handler." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.set_error_handler( nullptr ) );

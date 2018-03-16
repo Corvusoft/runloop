@@ -15,5 +15,7 @@ using corvusoft::core::RunLoop;
 
 TEST_CASE( "Constructor." )
 {
-    REQUIRE_NOTHROW( new RunLoop );
+    RunLoop runloop;
+    REQUIRE( runloop.is_stopped( ) == true );
+    REQUIRE( runloop.is_suspended( ) == false );
 }

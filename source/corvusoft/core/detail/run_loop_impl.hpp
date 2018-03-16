@@ -76,6 +76,20 @@ namespace corvusoft
                     raised_signal = value;
                 }
                 
+                void wait( const std::function< bool ( void ) >& predicate )
+                {
+                    std::unique_lock< std::mutex > guard( task_lock );
+                    
+                    do
+                    {
+                        pending_work.wait_for( guard, std::chrono::milliseconds( 100 ), predicate );
+                    }
+                    while ( predicate( ) == false );
+                    
+                    if ( guard.owns_lock( ) ) guard.unlock( );
+                    pending_work.notify_one( );
+                }
+                
                 const std::function< bool ( void ) > until_work_available = [ this ]( void )
                 {
                     if ( is_suspended ) return false;
@@ -90,9 +104,9 @@ namespace corvusoft
                 {
                     std::unique_lock< std::mutex > guard( task_lock );
                     
-                    while ( is_stopped == false )
+                    do
                     {
-                        pending_work.wait( guard, until_work_available );
+                        pending_work.wait_for( guard, std::chrono::milliseconds( 100 ), until_work_available );
                         
                         if ( is_stopped ) break;
                         if ( guard.owns_lock( ) and not is_suspended )
@@ -128,6 +142,7 @@ namespace corvusoft
                             else tasks.erase( position );
                         }
                     }
+                    while ( is_stopped == false );
                     
                     if ( guard.owns_lock( ) ) guard.unlock( );
                     pending_work.notify_all( );

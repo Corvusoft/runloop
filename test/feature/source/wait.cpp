@@ -19,7 +19,6 @@ using std::string;
 using std::function;
 using std::error_code;
 using std::make_shared;
-using std::make_error_code;
 using std::chrono::milliseconds;
 
 //Project Namespaces
@@ -27,7 +26,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Waiting for all tasks to complete execution" )
+TEST_CASE( "Waiting for all tasks to complete execution." )
 {
     atomic< int > count( 0 );
     const auto counter = [ &count ]( void )
@@ -41,18 +40,13 @@ TEST_CASE( "Waiting for all tasks to complete execution" )
     runloop->launch( counter );
     runloop->launch( counter );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
-    
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
     REQUIRE( count == 3 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
+    runloop->stop( );
 }
 
-TEST_CASE( "Waiting specified amount of time for tasks to complete execution" )
+TEST_CASE( "Waiting specified amount of time for tasks to complete execution." )
 {
     atomic< int > count( 0 );
     const auto counter = [ &count ]( void )
@@ -67,22 +61,18 @@ TEST_CASE( "Waiting specified amount of time for tasks to complete execution" )
     runloop->launch( counter );
     runloop->launch( counter );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
-    
-    status = runloop->wait( milliseconds( 250 ) );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( milliseconds( 250 ) );
     REQUIRE( count == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
+    runloop->stop( );
 }
 
-TEST_CASE( "Waiting specified task to complete execution" )
+TEST_CASE( "Waiting specified task to complete execution." )
 {
     atomic< int > count( 0 );
     const auto counter = [ &count ]( void )
     {
+        std::this_thread::sleep_for( milliseconds( 100 ) );
         count++;
         return error_code( );
     };
@@ -93,13 +83,10 @@ TEST_CASE( "Waiting specified task to complete execution" )
     runloop->launch( counter, "bcd" );
     runloop->launch( counter, "efg" );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
-    
-    status = runloop->wait( "bcd" );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( "bcd" );
     REQUIRE( count == 2 );
     
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
+    runloop->stop( );
+    REQUIRE( count == 3 );
 }

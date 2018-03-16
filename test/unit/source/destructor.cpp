@@ -13,7 +13,8 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Constructor." )
+TEST_CASE( "Destructor." )
 {
-    REQUIRE_NOTHROW( new RunLoop );
+    const auto runloop = new RunLoop;
+    REQUIRE_NOTHROW( delete runloop );
 }

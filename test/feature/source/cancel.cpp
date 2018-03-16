@@ -23,7 +23,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Cancel single task" )
+TEST_CASE( "Cancel single task." )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->set_worker_limit( 1 );
@@ -41,18 +41,14 @@ TEST_CASE( "Cancel single task" )
         return error_code( );
     }, "kill me, pleaseeee." );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
 }
 
-TEST_CASE( "Cancel multiple tasks" )
+TEST_CASE( "Cancel multiple tasks." )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->set_worker_limit( 1 );
@@ -77,18 +73,14 @@ TEST_CASE( "Cancel multiple tasks" )
         return error_code( );
     }, "queue" );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
 }
 
-TEST_CASE( "Cancel all tasks" )
+TEST_CASE( "Cancel all tasks." )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->set_worker_limit( 1 );
@@ -130,18 +122,14 @@ TEST_CASE( "Cancel all tasks" )
         return error_code( );
     }, "kill me, pleaseeee." );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
 }
 
-TEST_CASE( "Cancel single task by key pattern" )
+TEST_CASE( "Cancel single task by key pattern." )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->set_worker_limit( 1 );
@@ -159,18 +147,14 @@ TEST_CASE( "Cancel single task by key pattern" )
         return error_code( );
     }, "Job: 1234" );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
 }
 
-TEST_CASE( "Cancel multiple tasks by key pattern" )
+TEST_CASE( "Cancel multiple tasks by key pattern." )
 {
     auto runloop = make_shared< RunLoop >( );
     runloop->set_worker_limit( 1 );
@@ -194,13 +178,9 @@ TEST_CASE( "Cancel multiple tasks by key pattern" )
         return error_code( );
     }, "Job: 2" );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->start( );
+    runloop->wait( );
+    runloop->stop( );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
     REQUIRE( task_called == 0 );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
 }

@@ -15,7 +15,6 @@ using std::string;
 using std::function;
 using std::error_code;
 using std::chrono::seconds;
-using std::chrono::nanoseconds;
 using std::chrono::milliseconds;
 using std::chrono::system_clock;
 
@@ -24,7 +23,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Launch task in delay period with inactive loop" )
+TEST_CASE( "Launch task in delay period with inactive loop." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), nullptr ) );

@@ -15,7 +15,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Alter worker limit" )
+TEST_CASE( "Alter worker limit." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.set_worker_limit( numeric_limits< unsigned int >::min( ) ) );

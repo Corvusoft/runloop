@@ -21,7 +21,7 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Launch task at timestamp with inactive loop" )
+TEST_CASE( "Launch task at timestamp with inactive loop." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch_at( system_clock::now( ), nullptr ) );
@@ -36,5 +36,4 @@ TEST_CASE( "Launch task at timestamp with inactive loop" )
         FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" ) );
-    
 }

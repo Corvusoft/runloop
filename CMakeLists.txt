@@ -60,9 +60,9 @@ set_target_properties( ${SHARED_LIBRARY_NAME} PROPERTIES SOVERSION ${PROJECT_VER
 target_link_libraries( ${SHARED_LIBRARY_NAME} )
 
 enable_testing( )
-#add_subdirectory( "${PROJECT_SOURCE_DIR}/test/unit" )
+add_subdirectory( "${PROJECT_SOURCE_DIR}/test/unit" )
 add_subdirectory( "${PROJECT_SOURCE_DIR}/test/feature" )
-#add_subdirectory( "${PROJECT_SOURCE_DIR}/test/integration" )
+add_subdirectory( "${PROJECT_SOURCE_DIR}/test/integration" )
 
 #
 # Install

@@ -13,10 +13,8 @@ using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Call suspend with inactive loop" )
+TEST_CASE( "Call suspend with inactive loop." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.suspend( ) );
-    REQUIRE( runloop.is_stopped( ) == true );
-    REQUIRE( runloop.is_suspended( ) == false );
 }

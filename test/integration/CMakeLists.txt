@@ -13,6 +13,10 @@ include_directories( SYSTEM ${catch_INCLUDE} )
 #
 # Build
 #
+add_executable( constructor_integration_test_suite ${SOURCE_DIR}/constructor.cpp )
+target_link_libraries( constructor_integration_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( constructor_integration_test_suite ${EXECUTABLE_OUTPUT_PATH}/constructor_integration_test_suite )
+
 add_executable( resume_integration_test_suite ${SOURCE_DIR}/resume.cpp )
 target_link_libraries( resume_integration_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( resume_integration_test_suite ${EXECUTABLE_OUTPUT_PATH}/resume_integration_test_suite )

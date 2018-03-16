@@ -1,6 +1,5 @@
 //System Includes
 #include <memory>
-#include <system_error>
 
 //Project Includes
 #include "corvusoft/core/run_loop.hpp"
@@ -10,44 +9,37 @@
 
 //System Namespaces
 using std::make_shared;
-using std::error_code;
-using std::make_error_code;
 
 //Project Namespaces
 using corvusoft::core::RunLoop;
 
 //External Namespaces
 
-TEST_CASE( "Calling wait twice" )
+TEST_CASE( "Calling wait twice." )
 {
     auto runloop = make_shared< RunLoop >( );
+    runloop->start( );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    REQUIRE_NOTHROW( runloop->wait( ) );
+    REQUIRE_NOTHROW( runloop->wait( ) );
     
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
-    
-    status = runloop->wait( );
-    REQUIRE( status == error_code( ) );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
+    runloop->stop( );
+    REQUIRE( runloop->is_stopped( ) == true );
+    REQUIRE( runloop->is_suspended( ) == false );
 }
 
-TEST_CASE( "Calling wait on a suspended loop" )
+TEST_CASE( "Calling wait on a suspended loop." )
 {
     auto runloop = make_shared< RunLoop >( );
+    runloop->start( );
     
-    error_code status = runloop->start( );
-    REQUIRE( status == error_code( ) );
+    runloop->suspend( );
+    REQUIRE( runloop->is_stopped( ) == false );
+    REQUIRE( runloop->is_suspended( ) == true );
     
-    status = runloop->suspend( );
-    REQUIRE( status == error_code( ) );
+    REQUIRE_NOTHROW( runloop->wait( ) );
     
-    status = runloop->wait( );
-    REQUIRE( status == make_error_code( std::errc::operation_would_block ) );
-    
-    status = runloop->stop( );
-    REQUIRE( status == error_code( ) );
+    runloop->stop( );
+    REQUIRE( runloop->is_stopped( ) == true );
+    REQUIRE( runloop->is_suspended( ) == false );
 }
