@@ -70,8 +70,8 @@ add_subdirectory( "${PROJECT_SOURCE_DIR}/test/integration" )
 file( GLOB ARTIFACTS "source/corvusoft/core/*.hpp" )
 install( FILES ${ARTIFACTS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/corvusoft/core" )
 
-file( GLOB ARTIFACTS "source/corvusoft/mock/*.hpp" )
-install( FILES ${ARTIFACTS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/corvusoft/mock" )
+file( GLOB ARTIFACTS "source/corvusoft/stub/*.hpp" )
+install( FILES ${ARTIFACTS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/corvusoft/stub" )
 
 install( TARGETS ${STATIC_LIBRARY_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library )
 install( TARGETS ${SHARED_LIBRARY_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library )
