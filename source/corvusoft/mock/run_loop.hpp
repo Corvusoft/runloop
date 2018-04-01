@@ -2,8 +2,8 @@
  * Copyright 2013-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
-#ifndef _CORVUSOFT_MOCK_RUN_LOOP_H
-#define _CORVUSOFT_MOCK_RUN_LOOP_H 1
+#ifndef _CORVUSOFT_STUB_RUN_LOOP_H
+#define _CORVUSOFT_STUB_RUN_LOOP_H 1
 
 //System Includes
 #include <regex>
@@ -32,7 +32,7 @@ namespace corvusoft
         class RunLoop;
     }
     
-    namespace mock
+    namespace stub
     {
         //Forward Declarations
         
@@ -57,32 +57,32 @@ namespace corvusoft
                 //Functionality
                 bool is_stopped( void ) const
                 {
-                    return is_mock_stopped;
+                    return is_stub_stopped;
                 }
                 
                 bool is_suspended( void ) const
                 {
-                    return is_mock_suspended;
+                    return is_stub_suspended;
                 }
                 
                 void resume( void )
                 {
-                    is_mock_suspended = false;
+                    is_stub_suspended = false;
                 }
                 
                 void suspend( void )
                 {
-                    is_mock_suspended = true;
+                    is_stub_suspended = true;
                 }
                 
                 void stop( void )
                 {
-                    is_mock_stopped = true;
+                    is_stub_stopped = true;
                 }
                 
                 void start( void )
                 {
-                    is_mock_stopped = false;
+                    is_stub_stopped = false;
                 }
                 
                 void cancel( const std::string& )
@@ -197,11 +197,11 @@ namespace corvusoft
                 RunLoop& operator =( const RunLoop& value ) = delete;
                 
                 //Properties
-                bool is_mock_stopped = true;
+                bool is_stub_stopped = true;
                 
-                bool is_mock_suspended = false;
+                bool is_stub_suspended = false;
         };
     }
 }
 
-#endif  /* _CORVUSOFT_MOCK_RUN_LOOP_H */
+#endif  /* _CORVUSOFT_STUB_RUN_LOOP_H */
