@@ -24,13 +24,13 @@ TEST_CASE( "Launching tasks when a condition is met." )
     int task_called = 0;
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_if( false, [ &task_called ]( void )
+    runloop->launch_if( false, [ &task_called ]( error_code )
     {
         task_called++;
         return error_code( );
     } );
     
-    runloop->launch_if( true, [ &task_called ]( void )
+    runloop->launch_if( true, [ &task_called ]( error_code )
     {
         task_called++;
         return error_code( );

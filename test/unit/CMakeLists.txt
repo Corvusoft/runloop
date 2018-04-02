@@ -45,6 +45,10 @@ add_executable( resume_unit_test_suite ${SOURCE_DIR}/resume.cpp )
 target_link_libraries( resume_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( resume_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/resume_unit_test_suite )
 
+add_executable( set_default_breaker_unit_test_suite ${SOURCE_DIR}/set_default_breaker.cpp )
+target_link_libraries( set_default_breaker_unit_test_suite ${STATIC_LIBRARY_NAME} )
+add_test( set_default_breaker_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/set_default_breaker_unit_test_suite )
+
 add_executable( set_error_handler_unit_test_suite ${SOURCE_DIR}/set_error_handler.cpp )
 target_link_libraries( set_error_handler_unit_test_suite ${STATIC_LIBRARY_NAME} )
 add_test( set_error_handler_unit_test_suite ${EXECUTABLE_OUTPUT_PATH}/set_error_handler_unit_test_suite )

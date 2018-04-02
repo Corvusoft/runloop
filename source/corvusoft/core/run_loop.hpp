@@ -42,7 +42,7 @@ namespace corvusoft
                 //Friends
                 
                 //Definitions
-#define signal_t int
+                typedef int signal_t;
                 
                 //Constructors
                 RunLoop( void );
@@ -72,22 +72,34 @@ namespace corvusoft
                 
                 void wait( const std::chrono::milliseconds& duration );
                 
-                void launch( const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch( const std::function< std::error_code ( const std::error_code ) >& task, const std::string& key = "" );
                 
-                void launch_if( const bool condition, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch( const std::function< std::error_code ( const std::error_code ) >& task, const int breaker, const std::string& key = "" );
                 
-                void launch_on( const signal_t value, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch_if( const bool condition, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& key = "" );
                 
-                void launch_in( const std::chrono::milliseconds& delay, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch_if( const bool condition, const std::function< std::error_code ( const std::error_code ) >& task, const int breaker, const std::string& key = "" );
                 
-                void launch_at( const std::chrono::time_point< std::chrono::system_clock >& timestamp, const std::function< std::error_code ( void ) >& task, const std::string& key = "" );
+                void launch_on( const signal_t value, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& key = "" );
+                
+                void launch_on( const signal_t value, const std::function< std::error_code ( const std::error_code ) >& task, const int breaker, const std::string& key = "" );
+                
+                void launch_in( const std::chrono::milliseconds& delay, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& key = "" );
+                
+                void launch_in( const std::chrono::milliseconds& delay, const std::function< std::error_code ( const std::error_code ) >& task, const int breaker, const std::string& key = "" );
+                
+                void launch_at( const std::chrono::time_point< std::chrono::system_clock >& timestamp, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& key = "" );
+                
+                void launch_at( const std::chrono::time_point< std::chrono::system_clock >& timestamp, const std::function< std::error_code ( const std::error_code ) >& task, const int breaker, const std::string& key = "" );
                 
                 //Getters
                 
                 //Setters
+                void set_default_breaker( const int value );
+                
                 void set_worker_limit( const unsigned int value );
                 
-                void set_ready_handler( const std::function< std::error_code ( void ) >& value );
+                void set_ready_handler( const std::function< std::error_code ( const std::error_code ) >& value );
                 
                 void set_error_handler( const std::function< void ( const std::string&, const std::error_code&, const std::string& ) >& value );
                 

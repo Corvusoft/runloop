@@ -31,32 +31,8 @@ TEST_CASE( "Call cancel with unknown task key on inactive loop." )
     REQUIRE_NOTHROW( runloop.cancel( "123456" ) );
 }
 
-TEST_CASE( "Call cancel with known task key on inactive loop." )
-{
-    RunLoop runloop;
-    runloop.launch( [ ]( void )
-    {
-        FAIL( "Runloop should not invoke task until start has been called." );
-        return error_code( );
-    }, "test-key-value" );
-    
-    REQUIRE_NOTHROW( runloop.cancel( "test-key-value" ) );
-}
-
 TEST_CASE( "Call cancel with unknown task key pattern on inactive loop." )
 {
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.cancel( regex( "123456" ) ) );
-}
-
-TEST_CASE( "Call cancel with known task key pattern on inactive loop." )
-{
-    RunLoop runloop;
-    runloop.launch( [ ]( void )
-    {
-        FAIL( "Runloop should not invoke task until start has been called." );
-        return error_code( );
-    }, "test-key-value" );
-    
-    REQUIRE_NOTHROW( runloop.cancel( regex( "^test\\-key\\-value$" ) ) );
 }

@@ -110,27 +110,27 @@ namespace corvusoft
                     return;
                 }
                 
-                void launch( const std::function< std::error_code ( void ) >& task, const std::string& )
+                void launch( const std::function< std::error_code ( const std::error_code ) >& task, const std::string& )
                 {
                     task( );
                 }
                 
-                void launch_if( const bool condition, const std::function< std::error_code ( void ) >& task, const std::string& )
+                void launch_if( const bool condition, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& )
                 {
                     if ( condition ) task( );
                 }
                 
-                void launch_on( const signal_t, const std::function< std::error_code ( void ) >& task, const std::string& )
+                void launch_on( const signal_t, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& )
                 {
                     task( );
                 }
                 
-                void launch_in( const std::chrono::milliseconds&, const std::function< std::error_code ( void ) >& task, const std::string& )
+                void launch_in( const std::chrono::milliseconds&, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& )
                 {
                     task( );
                 }
                 
-                void launch_at( const std::chrono::time_point< std::chrono::system_clock >&, const std::function< std::error_code ( void ) >& task, const std::string& )
+                void launch_at( const std::chrono::time_point< std::chrono::system_clock >&, const std::function< std::error_code ( const std::error_code ) >& task, const std::string& )
                 {
                     task( );
                 }
@@ -143,7 +143,7 @@ namespace corvusoft
                     return;
                 }
                 
-                void set_ready_handler( const std::function< std::error_code ( void ) >& )
+                void set_ready_handler( const std::function< std::error_code ( const std::error_code ) >& )
                 {
                     return;
                 }

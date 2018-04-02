@@ -24,7 +24,7 @@ TEST_CASE( "Ready handler." )
 {
     bool ready_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_ready_handler( [ runloop, &ready_handler_called ]( void )
+    runloop->set_ready_handler( [ runloop, &ready_handler_called ]( error_code )
     {
         ready_handler_called = true;
         REQUIRE( runloop->is_stopped( ) == false );
@@ -42,7 +42,7 @@ TEST_CASE( "Ready handler." )
 TEST_CASE( "Returning errors from the ready handler." )
 {
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_ready_handler( [ ]( void )
+    runloop->set_ready_handler( [ ]( error_code )
     {
         return make_error_code( std::errc::connection_aborted );
     } );
@@ -67,7 +67,7 @@ TEST_CASE( "Returning errors from the ready handler." )
 TEST_CASE( "Throwing exceptions from the ready handler." )
 {
     auto runloop = make_shared< RunLoop >( );
-    runloop->set_ready_handler( [ ]( void )
+    runloop->set_ready_handler( [ ]( error_code )
     {
         throw "error";
         return error_code( );

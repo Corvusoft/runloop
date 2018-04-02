@@ -28,14 +28,26 @@ TEST_CASE( "Launch task in delay period with inactive loop." )
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), nullptr ) );
     REQUIRE_NOTHROW( runloop.launch_in( milliseconds( 500 ), nullptr, "test-key-value" ) );
-    REQUIRE_NOTHROW( runloop.launch_in( milliseconds( 200 ), [ ]( void )
+    REQUIRE_NOTHROW( runloop.launch_in( milliseconds( 200 ), [ ]( error_code )
     {
         FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     } ) );
-    REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), [ ]( void )
+    REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), [ ]( error_code )
     {
         FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" ) );
+    
+    int circuit_breaker = 1;
+    REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), [ ]( error_code )
+    {
+        FAIL( "Runloop should not invoke task until start has been called." );
+        return error_code( );
+    }, circuit_breaker ) );
+    REQUIRE_NOTHROW( runloop.launch_in( seconds( 1 ), [ ]( error_code )
+    {
+        FAIL( "Runloop should not invoke task until start has been called." );
+        return error_code( );
+    }, circuit_breaker, "test-key-value" ) );
 }

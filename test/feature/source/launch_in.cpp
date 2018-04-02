@@ -28,7 +28,7 @@ TEST_CASE( "Launching tasks after a specific delay." )
     const auto datestamp = system_clock::now( ) + delay;
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_in( delay, [ &task_called, datestamp ]( void )
+    runloop->launch_in( delay, [ &task_called, datestamp ]( error_code )
     {
         task_called = true;
         REQUIRE( system_clock::now( ) > datestamp );

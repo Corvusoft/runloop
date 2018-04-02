@@ -27,13 +27,15 @@ namespace corvusoft
     {
         struct TaskImpl
         {
+            int breaker = -1;
+            
             bool inflight = false;
             
             std::string key = "";
             
-            std::function< std::error_code ( void ) > operation = nullptr;
-            
             std::chrono::time_point< std::chrono::system_clock > timeout { };
+            
+            std::function< std::error_code ( std::error_code ) > operation = nullptr;
         };
     }
 }

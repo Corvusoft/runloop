@@ -49,6 +49,8 @@ namespace corvusoft
             
             struct RunLoopImpl
             {
+                int breaker_default_limit = -1;
+                
                 std::mutex task_lock { };
                 
                 std::condition_variable pending_work { };
@@ -65,7 +67,7 @@ namespace corvusoft
                 
                 unsigned int worker_limit = std::thread::hardware_concurrency( );
                 
-                std::function< std::error_code ( void ) > ready_handler = nullptr;
+                std::function< std::error_code ( const std::error_code ) > ready_handler = nullptr;
                 
                 std::function< void ( const std::string&, const std::error_code&, const std::string& ) > error_handler = nullptr;
                 
@@ -136,6 +138,9 @@ namespace corvusoft
                             
                             if ( status == std::errc::resource_unavailable_try_again )
                             {
+                                if ( position->breaker >= 1 )
+                                    position->breaker -= 1;
+                                    
                                 position->inflight = false;
                                 position->timeout = std::chrono::system_clock::now( );
                             }
@@ -162,7 +167,19 @@ namespace corvusoft
                 std::error_code launch( TaskImpl& task )
                 try
                 {
-                    auto status = task.operation( );
+                    static const std::error_code success;
+                    std::error_code status = success;
+                    
+                    if ( task.breaker == 0 )
+                    {
+                        static const auto canceled = std::make_error_code( std::errc::operation_canceled );
+                        status = task.operation( canceled );
+                        if ( status not_eq success )
+                            error( task.key, status, "task execution failed." );
+                        return canceled;
+                    }
+                    
+                    status = task.operation( success );
                     if ( status not_eq std::errc::resource_unavailable_try_again )
                         error( task.key, status, "task execution failed." );
                         

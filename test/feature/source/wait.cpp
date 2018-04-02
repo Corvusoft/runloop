@@ -29,7 +29,7 @@ using corvusoft::core::RunLoop;
 TEST_CASE( "Waiting for all tasks to complete execution." )
 {
     atomic< int > count( 0 );
-    const auto counter = [ &count ]( void )
+    const auto counter = [ &count ]( error_code )
     {
         count++;
         return error_code( );
@@ -49,7 +49,7 @@ TEST_CASE( "Waiting for all tasks to complete execution." )
 TEST_CASE( "Waiting specified amount of time for tasks to complete execution." )
 {
     atomic< int > count( 0 );
-    const auto counter = [ &count ]( void )
+    const auto counter = [ &count ]( error_code )
     {
         std::this_thread::sleep_for( milliseconds( 500 ) );
         count++;
@@ -70,7 +70,7 @@ TEST_CASE( "Waiting specified amount of time for tasks to complete execution." )
 TEST_CASE( "Waiting specified task to complete execution." )
 {
     atomic< int > count( 0 );
-    const auto counter = [ &count ]( void )
+    const auto counter = [ &count ]( error_code )
     {
         std::this_thread::sleep_for( milliseconds( 100 ) );
         count++;

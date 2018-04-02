@@ -165,20 +165,36 @@ namespace corvusoft
             m_pimpl->wait( predicate );
         }
         
-        void RunLoop::launch( const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch( const function< error_code ( const error_code ) >& task, const string& key )
         {
-            launch_at( system_clock::now( ), task, key );
+            launch( task, m_pimpl->breaker_default_limit, key );
         }
         
-        void RunLoop::launch_if( const bool condition, const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch( const function< error_code ( const error_code ) >& task, const int breaker, const string& key )
         {
-            if ( condition ) launch( task, key );
+            launch_at( system_clock::now( ), task, breaker, key );
         }
         
-        void RunLoop::launch_on( const signal_t value, const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch_if( const bool condition, const function< error_code ( const error_code ) >& task, const string& key )
+        {
+            launch_if( condition, task, m_pimpl->breaker_default_limit, key );
+        }
+        
+        void RunLoop::launch_if( const bool condition, const function< error_code ( const error_code ) >& task, const int breaker, const string& key )
+        {
+            if ( condition ) launch( task, breaker, key );
+        }
+        
+        void RunLoop::launch_on( const signal_t value, const function< error_code ( const error_code ) >& task, const string& key )
+        {
+            launch_on( value, task, m_pimpl->breaker_default_limit, key );
+        }
+        
+        void RunLoop::launch_on( const signal_t value, const function< error_code ( const error_code ) >& task, const int breaker, const string& key )
         {
             TaskImpl work;
             work.key = key;
+            work.breaker = breaker;
             work.operation = task;
             m_pimpl->signal_handlers[ value ] = work;
             
@@ -188,18 +204,29 @@ namespace corvusoft
                 signal( value, detail::RunLoopImpl::signal_handler );
         }
         
-        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( const error_code ) >& task, const string& key )
         {
-            launch_at( system_clock::now( ) + delay, task, key );
+            launch_in( delay, task, m_pimpl->breaker_default_limit, key );
         }
         
-        void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( void ) >& task, const string& key )
+        void RunLoop::launch_in( const milliseconds& delay, const function< error_code ( const error_code ) >& task, const int breaker, const string& key )
+        {
+            launch_at( system_clock::now( ) + delay, task, breaker, key );
+        }
+        
+        void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( const error_code ) >& task, const string& key )
+        {
+            launch_at( timestamp, task, m_pimpl->breaker_default_limit, key );
+        }
+        
+        void RunLoop::launch_at( const time_point< system_clock >& timestamp, const function< error_code ( const error_code ) >& task, const int breaker, const string& key )
         {
             if ( task == nullptr ) return;
             
             TaskImpl work;
             work.key = key;
             work.operation = task;
+            work.breaker = breaker;
             work.timeout = timestamp;
             
             unique_lock< mutex > guard( m_pimpl->task_lock );
@@ -208,12 +235,17 @@ namespace corvusoft
             m_pimpl->pending_work.notify_one( );
         }
         
+        void RunLoop::set_default_breaker( const int value )
+        {
+            m_pimpl->breaker_default_limit = value;
+        }
+        
         void RunLoop::set_worker_limit( const unsigned int value )
         {
             m_pimpl->worker_limit = value;
         }
         
-        void RunLoop::set_ready_handler( const function< error_code ( void ) >& value )
+        void RunLoop::set_ready_handler( const function< error_code ( const error_code ) >& value )
         {
             m_pimpl->ready_handler = value;
         }

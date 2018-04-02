@@ -25,14 +25,26 @@ TEST_CASE( "Launch a task with inactive loop." )
     RunLoop runloop;
     REQUIRE_NOTHROW( runloop.launch( nullptr ) );
     REQUIRE_NOTHROW( runloop.launch( nullptr, "test-key-value" ) );
-    REQUIRE_NOTHROW( runloop.launch( [ ]( void )
+    REQUIRE_NOTHROW( runloop.launch( [ ]( error_code )
     {
         FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     } ) );
-    REQUIRE_NOTHROW( runloop.launch( [ ]( void )
+    REQUIRE_NOTHROW( runloop.launch( [ ]( error_code )
     {
         FAIL( "Runloop should not invoke task until start has been called." );
         return error_code( );
     }, "test-key-value" ) );
+    
+    int circuit_breaker = 10;
+    REQUIRE_NOTHROW( runloop.launch( [ ]( error_code )
+    {
+        FAIL( "Runloop should not invoke task until start has been called." );
+        return error_code( );
+    }, circuit_breaker ) );
+    REQUIRE_NOTHROW( runloop.launch( [ ]( error_code )
+    {
+        FAIL( "Runloop should not invoke task until start has been called." );
+        return error_code( );
+    }, circuit_breaker, "my-key" ) );
 }

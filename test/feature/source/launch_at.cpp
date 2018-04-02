@@ -27,7 +27,7 @@ TEST_CASE( "Launching tasks at a specific datestamp." )
     const auto datestamp = system_clock::now( ) + seconds( 1 );
     
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_at( datestamp, [ &task_called, datestamp ]( void )
+    runloop->launch_at( datestamp, [ &task_called, datestamp ]( error_code )
     {
         task_called = true;
         REQUIRE( system_clock::now( ) > datestamp );

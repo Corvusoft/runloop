@@ -23,13 +23,13 @@ TEST_CASE( "Launching tasks on operating system signals." )
 {
     bool sigalrm_handler_called = false;
     auto runloop = make_shared< RunLoop >( );
-    runloop->launch_on( SIGUSR1, [ &sigalrm_handler_called ]( void )
+    runloop->launch_on( SIGUSR1, [ &sigalrm_handler_called ]( error_code )
     {
         sigalrm_handler_called = true;
         return error_code( );
     } );
     
-    runloop->launch( [ ]( void )
+    runloop->launch( [ ]( error_code )
     {
         raise( SIGUSR1 );
         return error_code( );
