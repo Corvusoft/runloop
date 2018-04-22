@@ -27,10 +27,6 @@
 namespace corvusoft
 {
     //Forward Declarations
-    namespace core
-    {
-        class RunLoop;
-    }
     
     namespace stub
     {
