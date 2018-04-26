@@ -1,9 +1,7 @@
 /*
  * Copyright 2013-2018, Corvusoft Ltd, All Rights Reserved.
  */
-
-#ifndef _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H
-#define _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H 1
+#pragma once
 
 //System Includes
 #include <chrono>
@@ -39,5 +37,3 @@ namespace corvusoft
         };
     }
 }
-
-#endif  /* _CORVUSOFT_CORE_DETAIL_TASK_IMPL_H */

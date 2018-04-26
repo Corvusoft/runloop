@@ -2,8 +2,7 @@
  * Copyright 2013-2018, Corvusoft Ltd, All Rights Reserved.
  */
 
-#ifndef _CORVUSOFT_CORE_RUN_LOOP_H
-#define _CORVUSOFT_CORE_RUN_LOOP_H 1
+#pragma once
 
 //System Includes
 #include <regex>
@@ -148,5 +147,3 @@ namespace corvusoft
         };
     }
 }
-
-#endif  /* _CORVUSOFT_CORE_RUN_LOOP_H */
